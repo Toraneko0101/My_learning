@@ -1,0 +1,17 @@
+Windows	Microsoft
+MacOS	Apple
+GCC: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+print.c
+main
+puts
+.symtab
+.strtab
+.shstrtab
+.rela.text
+.data
+.bss
+.rodata
+.comment
+.note.GNU-stack
+.note.gnu.property
+.rela.eh_frame
