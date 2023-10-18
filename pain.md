@@ -735,3 +735,100 @@ A. 小数点以下の値が切り捨てられるのを防ぐため
 ```
 
 # 6章
+- キーボードから入力を行う
+```
+・scanf("書式指定文字列", &変数名);
+・書式指定文字列：入力された値をprintfのように文字列に変換
+・&変数名: 入力されたデータを記憶しておく変数名を参照する
+・※変数の型がstrなら、&は要らない
+・実数の場合、%lfであることに注意
+```
+- code
+```c
+#include <stdio.h>
+
+int main(void){
+    double data;
+    scanf("%lf", &data);
+    printf("%f\n", data);
+    return 0;
+}
+```
+- 複数値の入力
+- 入力時は、スペース、タブ、改行などで区切って入力
+- 2つの指定子の間に区切る記号を指定する
+```c
+#include <stdio.h>
+
+int main(void){
+    int data1, data2;
+    scanf("%d-%d", &data1, &data2);
+    printf("%d, %d\n", data1, data2);
+    return 0;
+}
+```
+- 簡易Σ
+```c
+#include <stdio.h>
+
+int main(void){
+    /*宣言*/
+    int min, max, sum;
+
+    /*入力*/
+    printf("最小値と、最大値を,で区切って入力");
+    scanf("%d, %d", &min, &max);
+
+    /*計算*/
+    sum = (min + max)* (max - min + 1) / 2;
+
+    /*表示*/
+    printf("%d ~ %d の合計は %dです\n", min, max, sum); 
+
+    return 0;
+}   
+```
+
+- scanfは良くない?
+```
+・区切り記号を打ち間違えると実行結果が異なる
+・たとえばintの範囲を超えるとオーバーフローを起こす
+・他の型を入力して、挙動を狂わせることができてしまう
+```
+
+## 練習問題6
+
+### 1-1
+```
+Q. キーボードから数値を入力するために使う関数は？
+A. scanf
+```
+
+### 1-2
+```
+Q. 上記の関数を使うとき、変数名の前に付ける記号は？
+A. アンパサンド
+```
+
+### 2-1
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    int side, high, square;
+
+    scanf("%d,%d", &side, &high);
+    square = side * high / 2;
+    printf("%d\n", square);
+
+    return 0;
+}
+```
+```
+A. 三角形の面積
+```
+### 3-1
+```
+Q. 定価を入力すると、1割引、3割引、5割引、8割引の値段を、一覧表示するプログラムを作成せよ。なお、結果の金額は整数値での表示が望ましいが、実数でもかまわない。
+```
