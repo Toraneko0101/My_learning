@@ -50,7 +50,7 @@ int main(void){
     return 0;
 }
 ```
-- %9sとしなかった場合
+- %9sとしなかった場合(バッファオーバーフロー)
 ```
 文字列を入力してください(9文字まで):
 ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
