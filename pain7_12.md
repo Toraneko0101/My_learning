@@ -149,3 +149,223 @@ A. 0以外はTrue扱いなので
 ```
 
 # 8章
+- switch & case
+- cのcaseはor等が不可。弱い
+```c
+#include <stdio.h>
+
+int main(void){
+
+    int num;
+    scanf("%d", &num);
+    switch(num){
+        case 1:
+        case 10:
+            printf("%d\n", 1);
+            break;
+        case 2:
+            printf("%d\n", 2);
+            break;
+        default:
+            printf("%d\n", -1);
+            break;
+    }
+
+    return 0;
+}
+```
+
+## 練習問題
+
+### 1
+```
+A. else
+A. else-if
+A. switch-case
+```
+
+### 2
+```
+olympicの開催年1
+```
+
+### 3
+```
+caseとdefaultで書く。breakを忘れないように
+```
+
+### 4
+```
+共通した処理ならbreakは要らない。
+switch文は対応する番号のcase文にJumpする機能しかもっていないので、
+brakeをすることでcase文から抜ける
+```
+
+# 9章
+- loop
+```c
+#include <stdio.h>
+
+int main(void){
+
+    for (int i=1; i<=10; i++){
+        if(i==3){
+            break;
+        }
+        if(i==2){
+            continue;
+        }
+        printf("%d\n", i);
+    }
+
+
+    return 0;
+}
+```
+## 練習問題
+
+### 1
+```
+A. カウンタ変数
+A. 無限ループ
+```
+
+### 2
+```
+1~9割引の値段表示
+```
+
+### 3
+- 九九
+```c
+#include <stdio.h>
+
+int main(void){
+
+    for (int i=1; i<=10; i++){
+        if(i==3){
+            break;
+        }
+        if(i==2){
+            continue;
+        }
+        printf("%d\n", i);
+    }
+
+
+    return 0;
+}
+```
+
+## 4
+```
+カウンタ変数をstepに指定した分だけ変化させ、条件を外れた場合離脱する
+```
+
+# 10章
+- ねずみ算(100万を超える月)
+```c
+#include <stdio.h>
+#include <math.h>
+
+int main(void){
+
+    int judge = pow(10,6);
+    int current_money = 1;
+    int cnt = 1;
+    while(1){
+        current_money *= 2;
+        cnt ++;
+        if (current_money > judge){
+            break;
+        }
+    }
+    printf("%d\n", cnt);
+}
+```
+- do-while
+```c
+#include <stdio.h>
+
+int main(void){
+
+    double r;
+    double s;
+
+    do{
+        printf("半径?: ");
+        scanf("%lf", &r);
+    }while (r < 0);
+        s = r * r * 3.14;
+        printf("面積は %f です\n", s);
+
+    return 0;
+}
+```
+
+## 練習問題
+
+### 1
+```
+A. 先判定
+A. 後判定
+```
+### 2
+```
+年利1%で初期10000の時、何年で15000になるか
+```
+
+### 3
+```
+scanfとdo-while使う
+```
+
+###
+```
+後判定なので、1度は必ず入力処理を踏ませられるため
+```
+
+# 11章
+- プロトタイプ宣言: 引数は変数を省略して、型だけ書いてもいい。コンパイラは変数の実装まで管理しない
+- 仮引数：関数宣言に書かれた引数の型と名前。使用する変数を指定
+- 実引数：関数を呼び出すときに渡す数値
+```c
+# include <stdio.h>
+//printf等のプロトタイプ宣言はstdio.hファイル内に書かれている
+int sum(int, int);
+
+int main(void){
+    int i,j;
+    scanf("%d %d", &i, &j);
+    int ans = sum(i,j);
+    printf("%d\n", ans);
+    return 0;
+}
+
+int sum(int min, int max){
+    int ans = (min + max) * (max - min + 1) / 2;
+    return ans;
+}
+```
+
+## 練習問題
+### 1
+```
+A. プロトタイプ宣言
+A. 仮引数
+A. 実引数
+A. 戻り値
+```
+### 2
+```
+三角形の面積
+```
+### 3
+```
+略
+```
+### 4
+```
+処理を一つの部品としてまとめ、
+再度同じ処理を行う時に、二度手間を防ぐため
+```
