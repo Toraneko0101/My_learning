@@ -269,7 +269,6 @@ done
 
 : << "COMMENT"
 Author: @Toraneko0101
-Web: https://github.com/Toraneko0101
 
 バックアップするファイルと場所を入力するよう促すスクリプト
 ファイルはカレントの指定したディレクトリにバックアップする
@@ -317,4 +316,101 @@ cp {} ./$dir_name/:
     見つかったファイルを指定したバックアップディレクトリにコピー
 ```
 
-## 2.9.2 サーバへの接続
+## 2.9.3 サーバへの接続(ping)
+- 概要
+```
+・pingコマンドを3回だけ繰り返すように変更
+・動作していなければServer Deadと報告
+```
+- コード
+```bash
+#!/bin/bash
+
+: << "COMMENT"
+
+Author: @Toraneko0101
+指定したサーバにpingを送るスクリプト
+
+Last Edited: 25/10/2015
+COMMENT
+
+read -p "Which server should be pinged " server_addr
+ping -c3 $server_addr 2>&1 > /dev/null || echo "Server Dead"
+
+```
+- 説明
+```
+ping -c3: pingの回数を設定
+2>&1 標準出力も標準エラー出力も区別しない
+/dev/null: 投入された入力を捨て去る
+
+pingが失敗したら、右式が実行される
+
+※ 2>&1 > /dev/null
+・リダイレクトを複数指定した場合、左から順番に評価される
+・> /dev/null 2>&1にした場合、標準出力は捨てられ、標準エラー出力を、標準出力として出力しようとするが、標準出力の行き先が/dev/nullなので、結果として何も出力されなくなる
+```
+
+## 2.9.4 サーバへの接続(SSH)
+- 概要
+```
+・サーバアドレスとユーザ名を入力するよう促す
+・入力内容をSSHクライアントに渡す
+```
+- コード
+```bash
+#!/bin/bash
+
+# Author: @Toraneko0101
+# ssh接続のための情報を入力する
+# Last Edited: 25/10/2023
+
+read -p "Which server do you want to connect to: " server_name
+read -p "Which username do you want to use: " user_name
+ssh ${user_name}@server_name
+```
+- 説明
+```
+ssh ログイン名@接続先
+```
+
+## 2.9.5 サーバへの接続(MySQL/MariaDB)
+- コード
+```bash
+#!/bin/bash
+
+# Author: @Toraneko0101
+# Last Edited: 25/10/2023
+
+read -p "MySQL User: " user_name
+read -sp "MySQL Password: " mysql_pwd
+echo
+read -p "MySQL Command: " mysql_cmd
+read -p "MySQL Database: " mysql_db
+mysql -u "$user_name" -p$mysql_pwd $mysql_db -Be"$mysql_cmd"
+```
+- 説明
+```
+mysql [OPTIONS] [database] [command]
+-u : ユーザ名
+-p : パスワード。パスワードは-pの直後にスペースなしで指定する。スペースを空けるとほかのコマンドかもしれないと思われる
+データベース名: 単に記述。-Dがなくとも正しく解釈されるのは、位置引数として解釈されているため
+-B: 結果をタブ区切りで表示
+-e: 指定したクエリを実行。dbに対してクエリを実行するのでこの位置
+```
+
+## 2.9.6 ファイルの読み取り
+- code
+```bash
+#!/bin/bash
+
+while read line
+do
+    echo $line
+done < "$1"
+```
+- 説明
+```
+1. 指定したファイルの内容をwhileコマンドにリダイレクト
+2. readコマンドを用いて内容を1行ずつ読み取る
+```
