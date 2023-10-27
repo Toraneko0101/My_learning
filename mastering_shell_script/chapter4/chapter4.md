@@ -17,18 +17,18 @@
     ・古いディストリビューションの場合、viテキストエディタがあり、~/.exrcファイルが入っているかもしれない
 
 例)
-    abbr _sh #!/bin/bash
+    abbr __sh #!/bin/bash
     abbr <ショートカット> <文字列>
 
 C言語でいう#defineと似ているな
 
 使い方)
-    編集モード中に_shと押して、任意のキーを押すとショートカットが展開される
+    編集モード中に__shと押して、任意のキーを押すとショートカットが展開される
 
 実際の設定例)
-    abbr _py #!/usr/bin/env python
+    abbr __py #!/usr/bin/env python
     ※たぶん、半角スペースが空いていてもその通りに認識される
-    ※アンダーバーは必須ではないが、入力エラーをなくすために必要
+    ※アンダースコアは必須ではないが、入力エラーをなくすために必要。自分の場合はアンダースコア2つにした
     ※複数行の短縮入力を行う際は別のものを検討する
 ```
 
@@ -54,7 +54,7 @@ C言語でいう#defineと似ているな
 # $HOME/program_file/my_learning/mastering_shell_script/にifを作成した
 
 # ~/.vimrcに
-# abbr _sn $HOME/program_file/my_learning/mastering_shell_scriptと記載した
+# abbr __sn $HOME/program_file/my_learning/mastering_shell_scriptと記載した
 
 #インデント調整が要らないのは便利かも
 if [ 1 = 1 ]; then
@@ -97,7 +97,7 @@ soruce: 変数定義を実行時にスクリプトに組み込む
 ```bash
 #!/bin/bash
 
-#以下については _snで記載
+#以下については __snで記載
 source $HOME/program_file/my_learning/mastering_shell_script/snippets/color
 
 if [ "$#" -lt 1 ]; then
@@ -110,3 +110,69 @@ exit 0
 - ANSIエスケープシーケンスについて理解する
 
 # 4.3 VSCodeを用いたスニペットの作成
+- スニペットの作り方(説明)
+```
+ファイル -> ユーザ設定　-> ユーザスニペットの構成
+-> 言語を選択
+
+"echo 'Welcome to shell scripting! ${1|first,second,third|}' "
+    ・変数がプレースホルダーとなる。
+    ・||内にカンマ区切りで選択肢を表示可能
+    ・${1:book}などとすると、bookがデフォルト値となり、Tabキーで入力される
+```
+- スニペットの作り方(コード例)
+```json
+{
+	"Print bash short cut":{
+		"prefix": "_bash",
+		"body" : [
+			"#!/bin/bash"
+		],
+		"description:" "Print bash short cut"
+	},
+
+	"Print a welcome message":{
+		"prefix": "welcome",
+		"body": [
+			"echo 'Welcome to shell scripting! ${1|first,second,third|}' "
+		],
+		"description": "Print welcome message"
+	},
+
+    "Print snippets folder" :{
+        "prefix" : "_sn",
+        "body" : [
+            "$HOME/program_file/my_learning/mastering_shell_script/snippets/"
+        ],
+        "description" : "Print snippets folder"
+
+    }
+}
+```
+
+# 4.4 まとめ
+```
+・短縮入力はユーザ単位で.vimrcに設定
+・コードスニペットはとても便利
+・sourceコマンドで指定したファイルの変数を現在の環境で使える
+・VSCodeの場合は、短縮入力を行う際、条件を記載したり、ユーザによる入力を待てる
+```
+
+# 4.5 練習問題
+```
+4-1
+A. "echo 'Hello ${1|neko,inu|}' "のようにする
+
+4-2
+A. sourceコマンドを用いる
+```
+
+# 個人的な感想
+```
+・vimは便利だと思う
+・実際にneovimを入れた
+・ただ、undo周りの処理がよくわかっていない
+・暫くは拡張機能を無効化しておいて、vimで編集する際にだけスニペットを利用することにする
+・C#などでUnityのスクリプトを書く際に、VScodeのスニペットは役立ちそう。
+・ひとまずvscodeの短縮入力はアンダースコア1つ、vimの短縮入力はアンダースコア2つにして、一意性を保つようにした
+```
