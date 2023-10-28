@@ -253,7 +253,7 @@ read -p "Type color or mono for script output:"
 if [[ $REPLY =~ colou?r ]]; then
     source $HOME/program_file/my_learning/mastering_shell_script/snippets/color
 fi
-
+a
 # paramが設定されていない場合は、モノクロ表示
 echo -e "${RED}This is $0 $RESET"
 shopt -u nocasematch
@@ -261,3 +261,75 @@ exit 0
 ```
 
 # 5.5 ((を使った算術演算
+
+## 5.5.1 単純な計算
+```
+・二重丸括弧は、組み込みコマンドletの代わりになる
+
+$ (( a = 2 + 3 ))
+$ let a=2+3
+
+・算術展開の結果をパラメータに代入する場合や、算術展開の結果をコマンドの引数に使いたい場合は、丸括弧の前にドル記号がいる
+```
+- コード
+```bash
+#!/bin/bash
+a=$(( 2 + 3 ))
+echo $a
+echo $(( 2 + 3 ))
+let b=2+3
+echo $b
+```
+
+## 5.5.2
+```
+・二重丸括弧を使うと、C言語スタイルのパラメータ操作が可能
+```
+- コード
+```bash
+#!/bin/bash
+COUNT=1
+(( COUNT++ ))
+(( COUNT-- ))
+(( COUNT+=10 ))
+(( COUNT*=10 ))
+echo $COUNT
+
+# ※丸括弧の中で$は必要ない。
+#   二重丸括弧はパラメータ操作のために使うもので、明示的な展開は必要ないので
+```
+
+## 5.5.3 標準的な算術テスト
+```bash
+#!/bin/bash
+COUNT=10
+(( COUNT > 1 )) && echo "Count is greater than 1"
+
+# -gtを使う理由がなくなるのは便利
+```
+
+# 5.6
+```
+・[はコマンドであるため、空白文字の影響を受けないようにするため、引用符で囲む必要がある
+・[[はキーワードなので、先に解釈され、結果としてこの内部の変数は単語分割されない
+・更に、正規表現などのテストも行える
+・二重丸括弧は、C言語のような操作を可能にする
+
+```
+
+# 5.7　練習問題
+- 5-1
+```bash
+#!/bin/bash
+
+COUNT=25
+echo $(( COUNT -= 8 ))
+```
+- 5-2
+```
+$ rm "my file"
+```
+- 5-3
+```
+aに代入する際に、パラメータ展開が必要。
+```
