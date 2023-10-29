@@ -170,3 +170,38 @@ for (( v=1; v<=10; v++)); do
     echo "Value is $v"
 done
 ```
+
+# 6.6 入れ子ループ
+```bash
+#!/bin/bash
+
+for (( i=1; i<=3; i++)); do
+    echo "First loop $i"
+    for (( j=1; j<=3; j++)); do
+        echo "Second loop $j"
+    done
+done
+```
+
+# 6.7 ループの出力結果のリダイレクト
+```bash
+#!/bin/bash
+
+for (( i=1; i<=5; i++)); do
+    echo "$i"
+done > test1.txt
+```
+
+## 6.7.1 ループの制御
+- ディレクトリのみを半角区切りで表示
+```bash
+#!/bin/bash
+# && break等も使える
+for f in /home/toraneko/*; do
+    [ -d "$f" ] || continue
+    dir_name="$dir_name $f"
+done
+echo $dir_name
+```
+# 6.8 whileループとuntilループ
+
