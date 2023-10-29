@@ -203,5 +203,118 @@ for f in /home/toraneko/*; do
 done
 echo $dir_name
 ```
-# 6.8 whileループとuntilループ
 
+# 6.8 whileループとuntilループ
+- while(真である限り繰り返す)
+```bash
+#!/bin/bash
+
+count=10
+while (( count>=0 )) ; do
+    echo -e "$count \c"
+    (( count-- ))
+done ; echo
+```
+- until(真になるまで繰り返す)
+```bash
+#!/bin/bash
+
+count=10
+until (( count<0 )) ; do
+    echo -e "$count \c"
+    (( count-- ))
+done ; echo
+```
+- 補足
+```
+\cで改行を読み込まないようにしているので、doneの後で改行しておく
+```
+# 6.9 ファイルからの入力の読み込み
+```bash
+#!/bin/bash
+
+if [ ! -f "$1" ]; then
+    echo "The input to $0 should be a filename"
+    exit 1
+fi
+
+echo "The following server are up on $(date +%x)" > server.out
+while read server; do
+    ping -c1 "$server" && echo "Server up: $server" >> server.out
+done < "$1"
+
+cat server.out
+```
+- 説明
+```
+date +%x
+    +はformat指定で結果を出力
+    %xは日付となる
+while read server; do
+done < "$1"
+    $1で指定したファイルの各行をserverに代入
+
+pingについては以前触れているため省略。
+```
+
+# 6.10 オペレータ用メニューの作成
+```
+・限られたシェルの機能しか要らない人たち向けの選択メニューを作る
+```
+- コード
+```bash
+#!/bin/bash
+
+while true; do
+    clear
+    echo "Choose an item: a, b or c"
+    echo "a: Backup"
+    echo "b: Display Calendar"
+    echo "c: Exit"
+    #-s 標準入力から変数に代入する
+    read -sn1
+
+    case "$REPLY" in
+        a) tar -czvf ../backup.tgz ../bin;;
+        b) cal;;
+        c) exit 0;;
+    esac
+    read -n1 -p "Press any key to continue"
+done
+```
+- 補足
+```
+上記のスクリプトを実行する際、
+$ exec file.sh
+という風にすると、ユーザがshによる操作を完了したときに、シェルは残らなくなる
+
+exec
+    ・同じプロセス内で外部コマンドが実行される
+    ・余分なプロセスを作成しないので便利
+
+たとえば
+exec lsとすると、execによって、新しいプロセスは作成されず、現在のプロセスがlsコマンドに置き換えられる。そのためlsコマンドの実行が終わるとシェルも終了する。
+```
+
+# 6.11 まとめ?
+- Bashの括弧について復習する
+
+# 6.12 練習問題
+- 6-1
+```
+ファイルにリダイレクトされるので0行
+```
+- 6-2
+```
+4
+```
+- 6-3
+```
+,を;にする
+```
+- 6-4
+```
+無限ループする
+```
+- 6-5
+- 
