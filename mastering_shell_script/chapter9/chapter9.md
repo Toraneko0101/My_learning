@@ -244,6 +244,24 @@ sed -i "/<\/VirtualHost>/i <Directory $WEBDIR >\
 \n Allow from $NETWORK\
 \n</Directory>" $CONFFILE
 ```
+- 解説
+```
+sed -i "/pattern/i add_text" <filename>
+    コメントに書いた通り
+Order allow,deny
+    全てにアクセスが拒否になる(後方優先)
+Allow from XXX.XXX.XXX
+    許可
+Deny from XXX.XXX.XXX
+    拒否
+Allow from all
+    全て許可
+<Directory /var/www/host4>
+    var/www/host4ディレクトリのファイルについて、特定IPアドレスからのアクセスだけ許可
+
+※動かない場合は以下に書き直す
+Require all granted
+```
 
 - 修正
 ```bash
@@ -299,4 +317,14 @@ sed -i "/<\/VirtualHost>/i <Directory $WEBDIR >\
 \n Allow from 127.0.0.1\
 \n Allow from $NETWORK\
 \n</Directory>" $CONFFILE
+```
+
+# 9.5 練習問題
+- 9-1
+```
+sed -n '50 p' <file_name>
+```
+- 9-2
+```
+sed -i '^Listen [0-9]*/s//Listen 8080/' <file_name>
 ```

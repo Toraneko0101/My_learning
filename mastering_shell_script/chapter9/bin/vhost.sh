@@ -40,7 +40,7 @@ sudo apache2ctl configtest
 # apache2をreload
 sudo systemctl reload apache2
 
-# 
+# Allow
 read -p "Do you want to restrict access to this site? y/n "
 [ ${REPLY^^} = 'N' ] && exit 0
 read -p "Which network should we restrict access to: " NETWORK
@@ -50,3 +50,4 @@ sed -i "/<\/VirtualHost>/i <Directory $WEBDIR >\
 \n Allow from 127.0.0.1\
 \n Allow from $NETWORK\
 \n</Directory>" $CONFFILE
+
