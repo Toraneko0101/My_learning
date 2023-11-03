@@ -1,2 +1,2 @@
-hello: hello.c
-	gcc hello.c -o hello
+CFLAGS = -O3 -Wall -g
+hello:

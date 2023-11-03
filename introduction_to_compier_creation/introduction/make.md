@@ -140,7 +140,7 @@ myfood.o: myfood.c myfood.h
     gcc $< -c -o $@
 ```
 
-- パターンルール
+## パターンルール
 ```makefile
 favorite-ex: favorite-ex.o myfood.o
 	gcc $^ -o $@
@@ -150,4 +150,158 @@ favorite-ex: favorite-ex.o myfood.o
 
 favorite-ex.o: favorite-ex.c
 myfood.o: myfood.c myfood.h
+```
+- 解説
+```
+%.o: %.c
+    ・.oという拡張子のファイルを拡張子以外が同じ名前で、拡張子が.cのファイルから作成するルールを定義する
+    ・各オブジェクトの作成ルールについては依存関係のみの記述でよく、コマンド部は省略できる
+```
+
+## 組み込みルール
+- 省略記法
+```
+・makeはn.oというファイルがn.cに依存していると仮定する
+・つまり、これら(myfood.o : myfood.c)を明示的に記述する必要はない
+
+favorite-ex.o: favorite.c
+-> なし
+myfood.o: myfood.c myfood.h
+-> myfood.o: myfood.h
+```
+```makefile
+favorite-ex: favorite-ex.o myfood.o
+    gcc $^ -o $@
+
+%.o: %.c
+    gcc $< -c -o $@
+
+myfood.o: myfood.h
+```
+- 実行するコマンドも省ける
+```
+・makeはn.cからn.oを作るルールを持っている
+・そしてn.oから実行ファイルを作るルールも持っている
+
+・つまり、コンパイルコマンドが指定されていない場合、Makeはビルドに使用できるデフォルトのルールを適用する
+・.cから.oを生成する際、自動的にgcc $< -c -o $@を呼び出すコマンドを生成するというのがデフォルトルール
+・.oから実行ファイルを生成する際も、自動的にgccを呼び出すコマンドを生成するというのがデフォルトルールgcc $^ -o $@
+
+1. favorite-ex.oを再帰的に探索
+2. patternルールより、favorite-ex.o : favorite.c
+3. .c -> .o のデフォルトルールでfavorite-ex.oを生成
+4. patternルールより、myfood.o:  myfood.c myfood.h
+5. .c -> .o のデフォルトルールでmyfood.oを生成
+6. .o -> 実行ファイル のデフォルトルールでfavorite-exを生成
+
+
+%.o: %.c
+    $(CC) $(CFLAGS) $< -c -o $@
+%: %.o
+    $(CC) $(CFLAGS) $^ -o $@
+ちな、.c -> 実行ファイルの場合はこれ
+%: %.c
+    $(CC) $(CFLAGS) $< -o $@
+
+$(CC)
+    Cコンパイラを指定する環境変数。デフォルトgcc
+$(CFLAGS)
+    環境変数。追加オプション
+つまり今回の場合は、
+    gcc $< -o $@
+```
+```makefile
+favorite-ex: favorite-ex.o myfood.o
+myfood.o: myfood.h
+```
+- つまり、hello.cはこれだけでよかった
+```makefile
+hello:
+```
+
+## コンパイラオプションを渡すには？
+```
+・CFLAGSを使う
+・CCもMakefile内の記述で変更可能
+```
+- コード
+```makefile
+CFLAGS = -O3 -Wall -g
+hello:
+```
+- 特別な意味を持つ変数名
+```
+CFLAGS C言語のコンパイラオプション
+CXXFLAGS C++言語のコンパイラオプション
+LDFLAGS リンカオプション
+```
+
+# プログラミング以外の用途にmakeを使用
+```makefile
+chart.png: parsed.dat mkchart.gp
+    gnuplot -e "load 'mychart.gp'"
+
+parsed.dat: raw.log parse.py
+    parse.py $< > $@
+
+```
+
+## makeのいいところ
+```
+/usr/bin/make
+    ここにデフォルトで入っている
+```
+- 記法
+```
+<変数宣言>
+<タスク名>:
+    <実行したいshell>
+
+・make <タスク名>で実行
+・実行するshellを出力したくないなら@を先頭につける
+・めんどくさいコマンドを省略できるようになるので使えるかも
+
+compile: activator
+    ・activatorというファイルが存在していないと失敗
+    ・これはtarget : sourceと同じことをしているだけ
+
+・@makeでファイル内で@makeを呼ぶと明示的にタスクを呼べる
+```
+- 例
+```makefile
+# make -s doit
+# makefileがサブディレクトリ内で実行されているかのように見える場合、大量のメッセージ出力がある。-sを使うとサブディレクトリに移動するメッセージを残さないくなる。
+
+MESSAGE = "Nekodayo"
+
+show-ip:
+	ip a
+show-files:
+	@ls -lh
+show-message:
+	@echo ${MESSAGE}
+compile: activator
+	@echo "Yey!"
+
+task-a:
+	@echo "A"
+	@touch a.txt
+	@make task-b
+
+task-b: a.txt
+	@echo "B"
+	@touch b.txt
+	@make task-c
+
+task-c: b.txt
+	@echo "C"
+	@touch c.txt
+
+clean: a.txt b.txt
+	@rm a.txt b.txt c.txt
+	@echo "complete!"
+
+doit:
+	@make task-a
+	@make clean
 ```
