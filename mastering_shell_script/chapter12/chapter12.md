@@ -172,3 +172,100 @@ sort -nr
 ```
 
 ## 12.2.5 画像のホットリンクの識別
+```
+画像の直リンク
+    ・誰かがほかのサーバから画像にリンクを張ると、こっちの通信速度が低下する
+```
+- awkを使って画像のホットリンクを防止する
+```
+$ awk '
+BEGIN{
+    FS = "\""
+}
+{
+    if ($2 ~ /\.(png|jpg|gif)/){
+        print $4
+    }
+}' access.log | sort | uniq -c | sort -rn
+
+※apacheを使っている場合は、小さな.htaccesファイルを用いて、
+参照元が自分のドメインでないかどうかをチェック可能
+https://httpd.apache.org/docs/current/mod/mod_rewrite.html
+```
+
+# 12.3 もっともランキングの高いIPアドレスの表示
+```awk
+
+# 最もランキングの高いIPアドレス -> サイトにアクセスするために最も多く使われたアドレスを表示する
+# $1はIPなので、その回数を数える
+{ ip[$1]++ }
+END{
+    for (i in ip){
+        if (max < ip[i]){
+            max = ip[i]
+            maxnumber = i
+        }
+    }
+        print maxnumber, "has accessed ", max, " times."
+}
+```
+
+# 12.4 ブラウザーデータの表示
+```awk
+# アクセスするために使われたブラウザ情報
+{ browser[$12]++ }
+END {
+    for (b in browser){
+        print b, " has accessed ", browser[b], " times."
+    }
+}
+```
+
+# 12.5 Eメールログの処理
+```
+このファイルは$7がfrom or toらしい
+受信ならtoで始まり、送信ならfromで始まる
+```
+- コード
+```awk
+# 受信メッセージ
+$ awk '{
+    if ($7 ~ /^to/){
+        print $0
+    }
+}' mail.log
+```
+
+# 12.7 練習問題
+- 12-1
+```
+$1
+```
+- 12-2
+```
+NR
+```
+- 12-3
+```
+sort | uniq
+```
+- 12 -4
+```awk
+$ awk '{
+    if ($7 ~ /\.php/){
+        php[$7]++
+    }
+}
+END {
+    max=""
+    max_count=0
+    for (p in php){
+        if (php[p] > max_count){
+            max = p
+            max_count = php[p]
+        }
+    }
+    print max , ":", max_count
+}
+' access.log
+```
