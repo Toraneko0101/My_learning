@@ -28,25 +28,16 @@ char *user_input;
 //現在着目しているトークン
 Token *token;
 
-//エラーを報告するための関数
-//可変長引数
-void error(char *fmt, ...){
-  va_list ap;                 //可変長引数を一つの引数に変換
-  va_start(ap, fmt);          //可変長引数リストを初期化(引数リスト,指定した引数以降を引数リストに格納)
-  vfprintf(stderr, fmt, ap);  //可変長引数を受け取り、第1引数に第2引数で指定したfmtで、errorメッセージを出力
-  fprintf(stderr, "\n");      //第1引数に、出力
-  exit(1);                    //終了ステータス
-}
-//エラー箇所の報告
+//エラー箇所の報告(*locは現在のpointer)
 void error_at(char *loc, char *fmt, ...){
   va_list ap;
-  va_start(ap, fmt);
+  va_start(ap, fmt); //apがさす位置はfmtとなる
 
-  int pos = loc - user_input;
+  int pos = loc - user_input; //つまり、posには何文字進んだかが入る
   fprintf(stderr, "%s\n", user_input);
-  fprintf(stderr, "%*s", pos, " ");//pos個の空白
+  fprintf(stderr, "%*s", pos, "");//pos個の空白(*は、第二引数の文字列分、第3引数を表示。足りないなら空白パディング)
   fprintf(stderr, "^ ");
-  vfprintf(stderr, fmt, ap);
+  vfprintf(stderr, fmt, ap);  //可変個数の引数を指定した書式(第二引数)に従って、第1引数に返す
   fprintf(stderr, "\n");
   exit(1);
 }
@@ -143,7 +134,7 @@ Token *tokenize(){
 int main(int argc, char **argv){
   if(argc != 2){
     //引数の個数
-    error("%s: invalid number of arguments", argv[0]);
+    error_at("%s: invalid number of arguments", argv[0]);
     return 1;
   }
   //トークナイズする
