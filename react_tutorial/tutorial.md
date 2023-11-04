@@ -272,3 +272,278 @@ export default function MyApp(){
 ```
 
 ## フックの使用
+```
+useで始まる関数
+    ・Hook(フック)と呼ばれる
+    ・useStateはReactが提供する組み込みのHook
+    ・Hookを組み合わせて独自のHookを作成することも可能
+    ・Hookはcomponentのtopレベルでだけ呼び出せる
+```
+
+## component間のデータ共有
+```
+・Mybutton間で、countの回数を共通化するには？
+・その上位要素のMyAppにcountを持たせればいい
+・状態を上に移動するということ
+
+・波括弧で、渡される情報はpropsと呼ばれる
+・以下ではonClickはMyApp内のhandleClick関数となっているので，その中のコードが実行される
+
+```
+- MyButtonにデータを渡す
+```jsx
+//reactからuseStateをimportする
+import { useState } from "react";
+
+function MyButton({count, onClick}){
+    return (
+        <button onClick={onClick}>
+            Clicked {count} times
+        </button>
+    )
+}
+
+export default function MyApp(){
+    const [count, setCount] = useState(0);
+
+    function handleClick(){
+        setCount(count + 1);
+    }
+
+    return (
+        <>
+            <h1>Counters that update separately</h1>
+            <MyButton count={count} onClick={handleClick} />
+            <MyButton count={count} onClick={handleClick} />
+        </>
+    );
+}
+```
+## 三目並べを作成する
+
+- App.js
+```
+・コンポーネントを作成する
+・UIの部品を表す再利用可能なコード
+
+export
+    この関数をファイルの外部からアクセスできるようにする
+default
+    このコードを使用するほかのファイルにこの関数がmain関数であるということを伝える
+単一のJSX要素
+    複数の隣接するJSX要素はフラグメント<>で囲む
+    同一行にない場合は、returnに()が必要
+```
+```jsx
+export default function Square(){
+    return <button className="square">x</button>
+}
+```
+- styles.css
+```css
+/*className="square"*/
+/* *とbodyの影響もうけている*/
+  .square {
+    background: #fff;
+    border: 1px solid #999;
+    float: left;
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 34px;
+    height: 34px;
+    margin-right: -1px;
+    margin-top: -1px;
+    padding: 0;
+    text-align: center;
+    width: 34px;
+  }
+```
+
+- index.js
+```
+import {StrictMode} from 'react';
+    React
+import {createRoot} from "react-dom/client";
+    Webブラウザとやり取りするためのReactライブラリ(ReactDOM)
+import ".styles.css"
+    component用のstyle
+import App from "./App";
+    App.jsで作成したcomponent
+const root = createRoot(document.getElementById("root"))
+    <div id="root"></div>に成果物を注入している
+
+本番用のバンドルを作成するには
+    npm run build or yarn build
+
+```
+```jsx
+import {StrictMode} from 'react';
+import {createRoot} from 'react-dom/client';
+import "./styles.css";
+import App from './App';
+
+const root = createRoot(document.getElementById('root'));
+root.render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+- 複数要素を付け加えたApp.js
+```jsx
+function Square(){
+    return <button className="square">1</button>
+}
+
+export default function Board(){
+    return(
+        <>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+        </>
+    );
+}
+```
+- 引数を渡したもの
+```
+・jsxからjsの記法に戻るためには波括弧が必要
+・{value}という風に波括弧で囲むと、変数やプロパティの値が埋め込まれる。
+```
+```jsx
+function Square({ value }){
+    return <button className="square">{ value }</button>
+}
+
+export default function Board(){
+    return(
+        <>
+            <div className="board-row">
+                <Square value="1"/>
+                <Square value="2"/>
+                <Square value="3"/>
+            </div>
+            <div className="board-row">
+                <Square value="4"/>
+                <Square value="5"/>
+                <Square value="6"/>
+            </div>
+            <div className="board-row">
+                <Square value="7"/>
+                <Square value="8"/>
+                <Square value="9"/>
+            </div>
+        </>
+    );
+}
+```
+
+- 動的なcomponentの作成
+```jsx
+function Square({ value }){
+    function handleClick(){
+        console.log("clicked");
+    }
+    return (
+        <button
+            className="square"
+            onClick={handleClick}
+        >
+            {value}
+        </button>
+    );
+}
+
+export default function Board(){
+    return(
+        <>
+            <div className="board-row">
+                <Square value="1"/>
+                <Square value="2"/>
+                <Square value="3"/>
+            </div>
+            <div className="board-row">
+                <Square value="4"/>
+                <Square value="5"/>
+                <Square value="6"/>
+            </div>
+            <div className="board-row">
+                <Square value="7"/>
+                <Square value="8"/>
+                <Square value="9"/>
+            </div>
+        </>
+    );
+}
+```
+
+- useStateで記憶させる
+```jsx
+import {useState} from "react";
+
+function Square(){
+    const [value, setValue] = useState(null);
+    function handleClick(){
+        setValue("X"); //valueの値がnull->xに更新される
+    }
+    return (
+        <button
+            className="square"
+            onClick={handleClick}
+        >
+            {value}
+        </button>
+    );
+}
+
+export default function Board(){
+    return(
+        <>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+        </>
+    );
+}
+```
+
+- React Developer tools
+```
+・拡張機能
+・開発者ツールにComponentsが追加される(Reactを使っている場合)
+```
+
+- stateのリフトアップ
+```
+・勝ち負けを知るには、Board側が9つのSquareコンポーネントそれぞれのstateを知る必要がある
+・しかし、ゲームのStateをBoardで管理した方がいい
+
+※複数のchildコンポーネントからデータを通信したい。
+　あるいは2つのchild同士で通信したいと思ったら、親に共有のstateを持たせるべき
+　親はprop経由でstateを子供に渡す
+```

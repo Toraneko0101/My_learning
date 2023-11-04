@@ -1,37 +1,38 @@
-//reactからuseStateをimportする
-import { useState } from "react";
+import {useState} from "react";
 
-function MyButton(){
-    //useStateからは現在のstate(count)と更新するためのsetCountが得られる。初期値はuseStateの中に入れる。stateを変更したいときはsetCount()を呼び出す
-    const [count, setCount] = useState(0);
-
+function Square(){
+    const [value, setValue] = useState(null);
     function handleClick(){
-        setCount(count+1);
+        setValue("X"); //valueの値がnull->xに更新される
     }
-
     return (
-        <button onClick={handleClick}>
-            Clicked {count} times
+        <button
+            className="square"
+            onClick={handleClick}
+        >
+            {value}
         </button>
     );
 }
 
-function Mytest(){
-    const Items = [
-        <h1>neko</h1>,
-        <h1>inu</h1>,
-    ];
+export default function Board(){
     return(
-        Items
-    );
-}
-
-export default function MyApp(){
-    return(
-      <>
-        <MyButton />
-        <MyButton />
-        <Mytest />
-      </>
+        <>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+            <div className="board-row">
+                <Square />
+                <Square />
+                <Square />
+            </div>
+        </>
     );
 }
