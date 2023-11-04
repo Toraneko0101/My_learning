@@ -547,3 +547,213 @@ export default function Board(){
 　あるいは2つのchild同士で通信したいと思ったら、親に共有のstateを持たせるべき
 　親はprop経由でstateを子供に渡す
 ```
+```jsx
+import {useState} from "react";
+
+function Square({value}){
+    return <button className="square">{value}</button>;
+}
+
+export default function Board(){
+    //それぞれが配列になる
+    const [squares, setSquares] = useState(Array(9).fill(null));
+    return(
+        <>
+            <div className="board-row">
+                <Square value={squares[0]} />
+                <Square value={squares[1]} />
+                <Square value={squares[2]} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} />
+                <Square value={squares[4]} />
+                <Square value={squares[5]} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} />
+                <Square value={squares[7]} />
+                <Square value={squares[8]} />
+            </div>
+        </>
+    );
+}
+```
+- Clickされたときに起こることを定義する
+```
+・SquareからBoardのStateを更新する手段が必要
+・StateはComponentにprivateなので直接変更はできない
+・BoardからSquareに関数を渡して、Click時に呼び出せばいい
+```
+
+- 以下がうまくいかない理由
+```jsx
+Square value={squares[0]} onSquareClick={handleClick(0)} />
+```
+```
+・Boardコンポーネントのレンダー時にhandleClick(0)が発動するから
+・以前はhandleClickなので問題なかった
+・ユーザがクリックするまでhandleClickを呼び出さないようにするには?
+
+解決策1
+    handleClick(0)を呼び出す関数を作成
+解決策2
+    onSquareClick={() => handleClick(0)} 
+    マス目がクリックされると、=>の右辺が実行される
+```
+
+- 任意のマス目をClickしてXを描画する
+```jsx
+import {useState} from "react";
+
+function Square({value, onSquareClick}){
+    return <button className="square" onClick={onSquareClick}>
+        {value}
+    </button>;
+}
+
+export default function Board(){
+    const [squares, setSquares] = useState(Array(9).fill(null));
+    //squaresにアクセスできるのはclosureをsupportしているため
+    //内側の関数は外側の関数で定義されている変数や関数にアクセス可能
+    function handleClick(i){
+        //squares配列のcopyを作成
+        const nextSquares = squares.slice();
+        nextSquares[i] = "X";
+        setSquares(nextSquares);
+    }
+
+    return(
+        <>
+            <div className="board-row">
+                <Square value={squares[0]} onSquareClick={()=> handleClick(0)} />
+                <Square value={squares[1]} onSquareClick={()=> handleClick(1)} />
+                <Square value={squares[2]} onSquareClick={()=> handleClick(2)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} onSquareClick={()=> handleClick(3)} />
+                <Square value={squares[4]} onSquareClick={()=> handleClick(4)} />
+                <Square value={squares[5]} onSquareClick={()=> handleClick(5)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} onSquareClick={()=> handleClick(6)} />
+                <Square value={squares[7]} onSquareClick={()=> handleClick(7)} />
+                <Square value={squares[8]} onSquareClick={()=> handleClick(8)} />
+            </div>
+
+        </>
+    );
+}
+```
+
+- なぜsquares.slice();を使ったのか
+```
+・アクションの取り消しを行いたい場合に助かる
+・親のstateが変更されると子は自動で再レンダーされるので、copyを使うことでこれを回避することができる
+```
+- 手番の処理
+```jsx
+import {useState} from "react";
+
+function Square({value, onSquareClick}){
+    return <button className="square" onClick={onSquareClick}>
+        {value}
+    </button>;
+}
+
+export default function Board(){
+    //手番
+    const [xIsNext, setXIsNext] = useState(true);
+    const [squares, setSquares] = useState(Array(9).fill(null));
+    //squaresにアクセスできるのはclosureをsupportしているため
+    //内側の関数は外側の関数で定義されている変数や関数にアクセス可能
+    function handleClick(i){
+        //squares配列のcopyを作成
+        const nextSquares = squares.slice();
+        if(xIsNext){
+            nextSquares[i] = "X";
+        }else{
+            nextSquares[i] = "O";
+        }
+        setSquares(nextSquares);
+        setXIsNext(!xIsNext); //真偽値反転
+    }
+
+    return(
+        <>
+            <div className="board-row">
+                <Square value={squares[0]} onSquareClick={()=> handleClick(0)} />
+                <Square value={squares[1]} onSquareClick={()=> handleClick(1)} />
+                <Square value={squares[2]} onSquareClick={()=> handleClick(2)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} onSquareClick={()=> handleClick(3)} />
+                <Square value={squares[4]} onSquareClick={()=> handleClick(4)} />
+                <Square value={squares[5]} onSquareClick={()=> handleClick(5)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} onSquareClick={()=> handleClick(6)} />
+                <Square value={squares[7]} onSquareClick={()=> handleClick(7)} />
+                <Square value={squares[8]} onSquareClick={()=> handleClick(8)} />
+            </div>
+
+        </>
+    );
+}
+```
+
+- マス目に値が入っている場合の処理
+```jsx
+import {useState} from "react";
+
+function Square({value, onSquareClick}){
+    return <button className="square" onClick={onSquareClick}>
+        {value}
+    </button>;
+}
+
+export default function Board(){
+    //手番
+    const [xIsNext, setXIsNext] = useState(true);
+    const [squares, setSquares] = useState(Array(9).fill(null));
+    //squaresにアクセスできるのはclosureをsupportしているため
+    //内側の関数は外側の関数で定義されている変数や関数にアクセス可能
+    function handleClick(i){
+        //既に値が入っていれば早期リターン
+        if (squares[i]){
+            return;
+        }
+        //squares配列のcopyを作成
+        const nextSquares = squares.slice();
+        if(xIsNext){
+            nextSquares[i] = "X";
+        }else{
+            nextSquares[i] = "O";
+        }
+        //状態更新
+        setSquares(nextSquares);
+        setXIsNext(!xIsNext); //真偽値反転
+    }
+
+    return(
+        //Boardの状態を使用しているので中身が書き換わる
+        <>
+            <div className="board-row">
+                <Square value={squares[0]} onSquareClick={()=> handleClick(0)} />
+                <Square value={squares[1]} onSquareClick={()=> handleClick(1)} />
+                <Square value={squares[2]} onSquareClick={()=> handleClick(2)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} onSquareClick={()=> handleClick(3)} />
+                <Square value={squares[4]} onSquareClick={()=> handleClick(4)} />
+                <Square value={squares[5]} onSquareClick={()=> handleClick(5)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} onSquareClick={()=> handleClick(6)} />
+                <Square value={squares[7]} onSquareClick={()=> handleClick(7)} />
+                <Square value={squares[8]} onSquareClick={()=> handleClick(8)} />
+            </div>
+
+        </>
+    );
+}
+```
