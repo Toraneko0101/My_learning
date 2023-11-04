@@ -31,13 +31,13 @@ Token *token;
 //エラー箇所の報告(*locは現在のpointer)
 void error_at(char *loc, char *fmt, ...){
   va_list ap;
-  va_start(ap, fmt); //apがさす位置はfmtとなる
+  va_start(ap, fmt);                    //apがさす位置はfmtとなる
 
-  int pos = loc - user_input; //つまり、posには何文字進んだかが入る
+  int pos = loc - user_input;           //つまり、posには何文字進んだかが入る
   fprintf(stderr, "%s\n", user_input);
-  fprintf(stderr, "%*s", pos, "");//pos個の空白(*は、第二引数の文字列分、第3引数を表示。足りないなら空白パディング)
+  fprintf(stderr, "%*s", pos, "");      //pos個の空白(*は、第二引数の文字列分、第3引数を表示。足りないなら空白パディング)
   fprintf(stderr, "^ ");
-  vfprintf(stderr, fmt, ap);  //可変個数の引数を指定した書式(第二引数)に従って、第1引数に返す
+  vfprintf(stderr, fmt, ap);            //可変個数の引数を指定した書式(第二引数)に従って、第1引数に返す
   fprintf(stderr, "\n");
   exit(1);
 }
@@ -94,7 +94,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 // 入力文字列pをトークナイズし、それを返す
 Token *tokenize(){
   char *p = user_input;
-  Token head; //トークンのリストの先頭を指す。head.nextで先頭
+  Token head;//トークンのリストの先頭を指す。head.nextで先頭
   head.next = NULL;
   //一回目のloopではculがheadのアドレスを指しているので
   //head.nextは連結リストの先頭を指す。それ以降は
