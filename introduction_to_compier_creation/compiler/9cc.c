@@ -22,6 +22,9 @@ struct Token {
   char *str;      //トークン文字列
 };
 
+//入力文字列
+char *user_input;
+
 //現在着目しているトークン
 Token *token;
 
@@ -33,6 +36,19 @@ void error(char *fmt, ...){
   vfprintf(stderr, fmt, ap);  //可変長引数を受け取り、第1引数に第2引数で指定したfmtで、errorメッセージを出力
   fprintf(stderr, "\n");      //第1引数に、出力
   exit(1);                    //終了ステータス
+}
+//エラー箇所の報告
+void error_at(char *loc, char *fmt, ...){
+  va_list ap;
+  va_start(ap, fmt);
+
+  int pos = loc - user_input;
+  fprintf(stderr, "%s\n", user_input);
+  fprintf(stderr, "%*s", pos, " ");//pos個の空白
+  fprintf(stderr, "^ ");
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
 }
 
 // 次のトークンが期待している記号の時はトークンを1つ進めて真
@@ -47,10 +63,10 @@ bool consume(char op){
 }
 
 // 次のトークンが期待している記号の時はトークンを1つ進めて真
-// それ以外の場合はエラーを報告する
+// それ以外の場合はエラーを報告する(expectedが-確定になる)
 bool expect(char op){
   if (token->kind != TK_RESERVED || token->str[0] != op){
-    error("'%c'ではありません", op);
+    error_at(token->str, "expected '%c'", op);
   }
   //次のtokenへ
   token = token->next;
@@ -60,7 +76,7 @@ bool expect(char op){
 // それ以外の場合はエラーを報告する
 int expect_number(){
   if (token->kind != TK_NUM){
-    error("数ではありません");
+    error_at(token->str, "expected a number");
   }
   //次のtokenへ
   int val = token->val;
@@ -85,7 +101,8 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 }
 
 // 入力文字列pをトークナイズし、それを返す
-Token *tokenize(char *p){
+Token *tokenize(){
+  char *p = user_input;
   Token head; //トークンのリストの先頭を指す。head.nextで先頭
   head.next = NULL;
   //一回目のloopではculがheadのアドレスを指しているので
@@ -115,7 +132,7 @@ Token *tokenize(char *p){
       continue;
     }
 
-    error("トークナイズできません");
+    error_at(p, "expected a number");
   }
   //末尾の場合、記号で終わることはないのでpはstrtolで範囲外を示しているはずだ
   new_token(TK_EOF, cur, p);
@@ -125,11 +142,13 @@ Token *tokenize(char *p){
 
 int main(int argc, char **argv){
   if(argc != 2){
-    error("引数の個数が正しくありません");
+    //引数の個数
+    error("%s: invalid number of arguments", argv[0]);
     return 1;
   }
   //トークナイズする
-  token = tokenize(argv[1]);
+  user_input = argv[1];
+  token = tokenize();
 
   //アセンブリの前半部分を出力
   printf(".intel_syntax noprefix\n");
