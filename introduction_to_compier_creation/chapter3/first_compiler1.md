@@ -268,3 +268,25 @@ clean:
     ・その場合、ダミーターゲットである.PHONYが役に立つ
 
 ```
+
+## gitによるバージョン管理
+```
+.gitignoreで一時ファイルを除外する(compiler以下のfileだけ)
+・chapter*で作成した場合は、管理下に入れる。
+
+
+/*.gitignore*/
+*~
+*.o
+tmp*
+a.out
+9cc
+
+※repoごとにuser.nameを設定したい場合は
+git config --local user.name "HOGEHOGE"
+のようにする
+```
+- Git管理について
+```
+既にrepoを作成しているので略
+```
