@@ -757,3 +757,489 @@ export default function Board(){
     );
 }
 ```
+
+- 勝者の宣言
+```jsx
+import {useState} from "react";
+
+function Square({value, onSquareClick}){
+    return <button className="square" onClick={onSquareClick}>
+        {value}
+    </button>;
+}
+
+export default function Board(){
+    //手番
+    const [xIsNext, setXIsNext] = useState(true);
+    const [squares, setSquares] = useState(Array(9).fill(null));
+    //squaresにアクセスできるのはclosureをsupportしているため
+    //内側の関数は外側の関数で定義されている変数や関数にアクセス可能
+    function handleClick(i){
+        //値が入っているか、勝者が決まっているなら早期リターン
+        if (squares[i] || calculateWinner(squares)){
+            return;
+        }
+        //squares配列のcopyを作成
+        const nextSquares = squares.slice();
+        if(xIsNext){
+            nextSquares[i] = "X";
+        }else{
+            nextSquares[i] = "O";
+        }
+        //状態更新
+        setSquares(nextSquares);
+        setXIsNext(!xIsNext); //真偽値反転
+    }
+
+    //勝者確認
+    const winner = calculateWinner(squares);
+    let status;
+    if (winner){
+        status = "Winner: " + winner;
+    }else{
+        status = "Next player: " + (xIsNext ? "X" : "O");
+    }
+
+    return(
+        //Boardの状態を使用しているので中身が書き換わる
+        <>
+            <div className="status">{status}</div>
+            <div className="board-row">
+                <Square value={squares[0]} onSquareClick={()=> handleClick(0)} />
+                <Square value={squares[1]} onSquareClick={()=> handleClick(1)} />
+                <Square value={squares[2]} onSquareClick={()=> handleClick(2)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} onSquareClick={()=> handleClick(3)} />
+                <Square value={squares[4]} onSquareClick={()=> handleClick(4)} />
+                <Square value={squares[5]} onSquareClick={()=> handleClick(5)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} onSquareClick={()=> handleClick(6)} />
+                <Square value={squares[7]} onSquareClick={()=> handleClick(7)} />
+                <Square value={squares[8]} onSquareClick={()=> handleClick(8)} />
+            </div>
+
+        </>
+    );
+}
+
+function calculateWinner(squares){
+    const lines = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,3,6],
+        [1,4,7],
+        [2,5,8],
+        [0,4,8],
+        [2,4,6]
+    ];
+    for (let i=0; i<lines.length; i++){
+        const [a,b,c] = lines[i];
+        //つまり、abcともに同じゲームならその記号を返す
+        //そろっていなかったらnullを返す
+        if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
+            return squares[a];
+        }
+    }
+    return null;
+}
+```
+
+- 履歴保持
+```jsx
+import {useState} from "react";
+
+function Square({value, onSquareClick}){
+    return <button className="square" onClick={onSquareClick}>
+        {value}
+    </button>;
+}
+
+function Board({xIsNext, squares, onPlay}){
+    function handleClick(i){
+        //値が入っているか、勝者が決まっているなら早期リターン
+        if (squares[i] || calculateWinner(squares)){
+            return;
+        }
+        //squares配列のcopyを作成
+        const nextSquares = squares.slice();
+        if(xIsNext){
+            nextSquares[i] = "X";
+        }else{
+            nextSquares[i] = "O";
+        }
+        onPlay(nextSquares);
+    }
+
+    //勝者確認
+    const winner = calculateWinner(squares);
+    let status;
+    if (winner){
+        status = "Winner: " + winner;
+    }else{
+        status = "Next player: " + (xIsNext ? "X" : "O");
+    }
+
+    return(
+        //Boardの状態を使用しているので中身が書き換わる
+        <>
+            <div className="status">{status}</div>
+            <div className="board-row">
+                <Square value={squares[0]} onSquareClick={()=> handleClick(0)} />
+                <Square value={squares[1]} onSquareClick={()=> handleClick(1)} />
+                <Square value={squares[2]} onSquareClick={()=> handleClick(2)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} onSquareClick={()=> handleClick(3)} />
+                <Square value={squares[4]} onSquareClick={()=> handleClick(4)} />
+                <Square value={squares[5]} onSquareClick={()=> handleClick(5)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} onSquareClick={()=> handleClick(6)} />
+                <Square value={squares[7]} onSquareClick={()=> handleClick(7)} />
+                <Square value={squares[8]} onSquareClick={()=> handleClick(8)} />
+            </div>
+
+        </>
+    );
+}
+
+function calculateWinner(squares){
+    const lines = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,3,6],
+        [1,4,7],
+        [2,5,8],
+        [0,4,8],
+        [2,4,6]
+    ];
+    for (let i=0; i<lines.length; i++){
+        const [a,b,c] = lines[i];
+        //つまり、abcともに同じゲームならその記号を返す
+        //そろっていなかったらnullを返す
+        if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
+            return squares[a];
+        }
+    }
+    return null;
+}
+
+export default function Game(){
+    const [xIsNext, setXIsNext] = useState(true);
+    //要素数が1つの配列を渡す
+    const [history, setHistory] = useState([Array(9).fill(null)]);
+    const currentSquares = history[history.length - 1];
+
+    function handlePlay(nextSquares){
+        //historyのすべての要素の後にnextSquaresが繋がった配列を作成
+        setHistory([...history, nextSquares]);
+        setXIsNext(!xIsNext);
+    }
+    return(
+        <div className="game">
+            <div className="game-board">
+                <Board 
+                xIsNext={xIsNext} 
+                squares={currentSquares} 
+                onPlay={handlePlay} />
+            </div>
+            <div className="game-info">
+                <ol>{/*TODO*/}</ol>
+            </div>
+        </div>
+    );
+}
+```
+
+- 履歴に戻る
+```
+配列を別の配列に変換するためにmapメソッドを使う
+[1,2,3].map((x) => x * 2)
+```
+
+- Jump機能の追加
+```jsx
+    const moves = history.map((squares, move)=>{
+        let description;
+        if (move > 0){
+            description = "Go to move #" + move;
+        }else{
+            description = "Go top game start";
+        }
+
+        return (
+            <li>
+                <button onClick={()=> jumpTo(move)}>{description}</button>
+            </li>
+        );
+    })
+```
+
+- 最終形態
+```jsx
+import {useState} from "react";
+
+function Square({value, onSquareClick}){
+    return <button className="square" onClick={onSquareClick}>
+        {value}
+    </button>;
+}
+
+function Board({xIsNext, squares, onPlay}){
+    function handleClick(i){
+        //値が入っているか、勝者が決まっているなら早期リターン
+        if (squares[i] || calculateWinner(squares)){
+            return;
+        }
+        //squares配列のcopyを作成
+        const nextSquares = squares.slice();
+        if(xIsNext){
+            nextSquares[i] = "X";
+        }else{
+            nextSquares[i] = "O";
+        }
+        onPlay(nextSquares);
+    }
+
+    //勝者確認
+    const winner = calculateWinner(squares);
+    let status;
+    if (winner){
+        status = "Winner: " + winner;
+    }else{
+        status = "Next player: " + (xIsNext ? "X" : "O");
+    }
+
+    return(
+        //Boardの状態を使用しているので中身が書き換わる
+        <>
+            <div className="status">{status}</div>
+            <div className="board-row">
+                <Square value={squares[0]} onSquareClick={()=> handleClick(0)} />
+                <Square value={squares[1]} onSquareClick={()=> handleClick(1)} />
+                <Square value={squares[2]} onSquareClick={()=> handleClick(2)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} onSquareClick={()=> handleClick(3)} />
+                <Square value={squares[4]} onSquareClick={()=> handleClick(4)} />
+                <Square value={squares[5]} onSquareClick={()=> handleClick(5)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} onSquareClick={()=> handleClick(6)} />
+                <Square value={squares[7]} onSquareClick={()=> handleClick(7)} />
+                <Square value={squares[8]} onSquareClick={()=> handleClick(8)} />
+            </div>
+
+        </>
+    );
+}
+
+function calculateWinner(squares){
+    const lines = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,3,6],
+        [1,4,7],
+        [2,5,8],
+        [0,4,8],
+        [2,4,6]
+    ];
+    for (let i=0; i<lines.length; i++){
+        const [a,b,c] = lines[i];
+        //つまり、abcともに同じゲームならその記号を返す
+        //そろっていなかったらnullを返す
+        if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
+            return squares[a];
+        }
+    }
+    return null;
+}
+
+export default function Game(){
+    const [xIsNext, setXIsNext] = useState(true);
+    //要素数が1つの配列を渡す
+    const [history, setHistory] = useState([Array(9).fill(null)]);
+    const [currentMove, setCurrentMove] = useState(0); //現在が何番目の着手か
+    const currentSquares = history[currentMove]; //現在の盤面状況
+
+    function handlePlay(nextSquares){
+        //historyの着手までを保持し、その後ろに付け加える。currentMoveが0なら0番目のみ保持される
+        const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+        setHistory(nextHistory);
+        setCurrentMove(nextHistory.length - 1);
+        setXIsNext(!xIsNext);
+    }
+
+    //手番ボタンを押したときの処理
+    function jumpTo(nextMove){
+        //TODO
+        setCurrentMove(nextMove); //着手を更新
+        setXIsNext(nextMove %2 === 0); //手番を更新
+    }
+    //第1引数が処理中の要素、第2引数がidx
+    const moves = history.map((squares, move)=>{
+        let description;
+        if (move > 0){
+            description = "Go to move #" + move;
+        }else{
+            description = "Go top game start";
+        }
+
+        return (
+            <li key={move}>
+                <button onClick={()=> jumpTo(move)}>{description}</button>
+            </li>
+        );
+    })
+    return(
+        <div className="game">
+            <div className="game-board">
+                <Board 
+                xIsNext={xIsNext} 
+                squares={currentSquares} 
+                onPlay={handlePlay} />
+            </div>
+            <div className="game-info">
+                <ol>{moves}</ol>
+            </div>
+        </div>
+    );
+}
+```
+
+- リファクタリング済み
+```jsx
+import {useState} from "react";
+
+function Square({value, onSquareClick}){
+    return <button className="square" onClick={onSquareClick}>
+        {value}
+    </button>;
+}
+
+function Board({xIsNext, squares, onPlay}){
+    function handleClick(i){
+        //値が入っているか、勝者が決まっているなら早期リターン
+        if (squares[i] || calculateWinner(squares)){
+            return;
+        }
+        //squares配列のcopyを作成
+        const nextSquares = squares.slice();
+        if(xIsNext){
+            nextSquares[i] = "X";
+        }else{
+            nextSquares[i] = "O";
+        }
+        onPlay(nextSquares);
+    }
+
+    //勝者確認
+    const winner = calculateWinner(squares);
+    let status;
+    if (winner){
+        status = "Winner: " + winner;
+    }else{
+        status = "Next player: " + (xIsNext ? "X" : "O");
+    }
+
+    return(
+        //Boardの状態を使用しているので中身が書き換わる
+        <>
+            <div className="status">{status}</div>
+            <div className="board-row">
+                <Square value={squares[0]} onSquareClick={()=> handleClick(0)} />
+                <Square value={squares[1]} onSquareClick={()=> handleClick(1)} />
+                <Square value={squares[2]} onSquareClick={()=> handleClick(2)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[3]} onSquareClick={()=> handleClick(3)} />
+                <Square value={squares[4]} onSquareClick={()=> handleClick(4)} />
+                <Square value={squares[5]} onSquareClick={()=> handleClick(5)} />
+            </div>
+            <div className="board-row">
+                <Square value={squares[6]} onSquareClick={()=> handleClick(6)} />
+                <Square value={squares[7]} onSquareClick={()=> handleClick(7)} />
+                <Square value={squares[8]} onSquareClick={()=> handleClick(8)} />
+            </div>
+
+        </>
+    );
+}
+
+function calculateWinner(squares){
+    const lines = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,3,6],
+        [1,4,7],
+        [2,5,8],
+        [0,4,8],
+        [2,4,6]
+    ];
+    for (let i=0; i<lines.length; i++){
+        const [a,b,c] = lines[i];
+        //つまり、abcともに同じゲームならその記号を返す
+        //そろっていなかったらnullを返す
+        if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
+            return squares[a];
+        }
+    }
+    return null;
+}
+
+export default function Game(){
+    //要素数が1つの配列を渡す
+    const [history, setHistory] = useState([Array(9).fill(null)]);
+    const [currentMove, setCurrentMove] = useState(0);
+    const xIsNext = currentMove % 2 === 0;
+    const currentSquares = history[currentMove];
+
+    function handlePlay(nextSquares){
+        //historyのすべての要素の後にnextSquaresが繋がった配列を作成
+        const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+        setHistory(nextHistory);
+        //現在の手番を配列の長さで決める
+        setCurrentMove(nextHistory.length - 1);
+    }
+
+    function jumpTo(nextMove){
+        //TODO
+        setCurrentMove(nextMove);
+    }
+    //第1引数が処理中の要素、第2引数がidx
+    const moves = history.map((squares, move)=>{
+        let description;
+        if (move > 0){
+            description = "Go to move #" + move;
+        }else{
+            description = "Go top game start";
+        }
+        //renderした時に、keyでstateを維持する(兄弟間で一意であればいい)
+        return (
+            <li key={move}>
+                <button onClick={()=> jumpTo(move)}>{description}</button>
+            </li>
+        );
+    })
+    //currentSquaresで現在の着手をrender
+    return(
+        <div className="game">
+            <div className="game-board">
+                <Board 
+                xIsNext={xIsNext} 
+                squares={currentSquares} 
+                onPlay={handlePlay} />
+            </div>
+            <div className="game-info">
+                <ol>{moves}</ol>
+            </div>
+        </div>
+    );
+}
+```
