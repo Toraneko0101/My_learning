@@ -384,3 +384,73 @@ flowchart TD
 ```
 
 - 再帰を含む生成規則
+```
+再帰的な文法の生成
+
+expr = mul ("+" mul | "-" mul)*
+mul = primary ("*" primary | "/" primary)*
+primary = num | "(" expr ")"
+
+・primaryは1つの数字に展開するor括弧でくくられた任意の式に展開する。
+
+```
+
+
+- 1*(2+3)の構文木
+```mermaid
+flowchart TD;
+  A(expr) --> B(mul)
+    B(mul) --> C_1(primary)
+      C_1(primary) --> D_1(num)
+        D_1(num) --> E_1(1)
+    B(mul) --> C_2( * )
+    B(mul) --> C_3(primary)
+      C_3 --> D_2(（)
+      C_3 --> D_3(expr)
+        D_3 --> E_2(mul)
+          E_2(mul) --> F_1(primary)
+            F_1(primary) --> G_1(num)
+              G_1(num) --> H_1(2)
+        D_3 --> E_3( + )
+        D_3 --> E_4(mul)
+          E_4(mul) --> F_2(primary)
+            F_2(primary) --> G_2(num)
+              G_2(num) --> H_2(3)
+      C_3 --> D_4(）)
+
+
+```
+
+- 再帰下降構文解析
+```
+Cプログラムを機械的に生成する場合
+  1. C言語の生成規則を与える
+  2. 展開して任意のCプログラムを生成
+
+我々がやりたいこと
+  1.外部から文字列としてCプログラムが与えられる
+  2.展開すると入力の文字列になる構文木の構造を知る
+
+規則が与えられれば、構文木を求めるコードは機械的に書ける
+  ⇒再帰下降構文解析法
+
+再帰下降構文解析法でパーサを書区場合
+  非終端記号1つ1つを関数1つ1つにマップする
+  つまり、以下の記号がある場合
+  expr = mul ("+" mul | "-" mul)*
+  mul = primary ("*" primary | "/" primary)*
+  primary = num | "(" expr ")"
+  パーサは3つの関数を持ち、各々の関数は名前通りのトークン列をパースする
+  
+  ・トークン　⇒　パーサ　⇒　抽象構文木を作って返す
+```
+- ノードの型を定義する
+```c
+typedef enum{
+  ND_ADD,
+  ND_SUM,
+  ND_MUL,
+  ND_DIV,
+  ND_NUM,
+} NodeKind;
+```
