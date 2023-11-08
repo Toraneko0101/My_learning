@@ -447,10 +447,105 @@ Cプログラムを機械的に生成する場合
 - ノードの型を定義する
 ```c
 typedef enum{
-  ND_ADD,
-  ND_SUM,
-  ND_MUL,
-  ND_DIV,
-  ND_NUM,
+  ND_ADD, // +
+  ND_SUB, // -
+  ND_MUL, // *
+  ND_DIV, // /
+  ND_NUM, // 整数
 } NodeKind;
+
+typedef struct Node Node;
+
+struct Node{
+  NodeKind kind;  //ノードの型
+  Node *lhs;      //左辺(left-hand side)
+  Node *rhs;      //右辺
+  int val;        //kindがND_NUMの場合に使用
+}
+```
+- 新しいノードを作成する関数
+```c
+//左辺と右辺を受け取るもの
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = kind;
+  node->lhs = lhs;
+  node->rhs = rhs;
+  return node;
+}
+//数値
+Node *new_node_num(int val){
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_NUM;
+  node->val = val;
+  return node;
+}
+```
+- exprを定義する
+```c
+// +や-は左結合の演算子
+//consumeは次のトークンが引数とマッチするときに入力を1トークン進めるもの
+Node *expr(){
+  Node *node = mul();
+
+  for(;;){
+    //左辺が前のノードで、右辺がmul()の結果
+    if(consume('+'))
+      node = new_node(ND_ADD, node, mul());
+    else if(consume('-'))
+      node = new_node(ND_SUB, node, mul());
+    else
+      return node;
+  }
+}
+
+```
+
+- mulを定義する
+```c
+Node *mul(){
+  Node *node = primary();
+  for (;;){
+    if (consume('*'))
+      node = new_node(ND_MUL, node, primary());
+    else if (consume('/'))
+      node = new_node(ND_DIV, node, primary());
+    else
+      return node; 
+  }
+}
+```
+- primaryを定義する
+```c
+Node *primary(){
+  if(consume('(')){
+    Node *node = expr();
+    expect(')');
+    return node;
+  }
+  return new_node_num(expect_number());
+}
+```
+- 1+2*3をparseする
+```
+1. 式全体はexprなので、exprを呼ぶ。for(;;)なので終わるまで読まれる
+2. mulが呼ばれる
+3. primaryが呼ばれる
+4. 1がexprまで返る
+5. exprのif(consume('+'))が真になる
+6. +トークンが消費され、右辺でmulが呼ばれる
+7. primaryが呼ばれる
+8. 2がmulに返る
+9. if(consume('*'))が真になる
+10. *トークンが消費され、右辺でprimaryが呼ばれる
+11. 3がmulに返る
+12. 2*3を表す構文木がexprに返る
+13. 組み合わされて1+2*3となったものがexprから返る
+```
+- 呼び出し関係の図
+```
+1         +       2       *       3
+[primary]         [primary]       [primary]
+[mul]             [        mul            ]
+[                  expr                   ]
 ```
