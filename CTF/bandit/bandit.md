@@ -196,3 +196,82 @@ jN2kgmIXJ6fShzhT2avhotn4Zcka6tnt
 ```
 
 ## level15
+```
+openssl s_client [-connect host:port]
+    遠隔ホストにSSL/TLSを使って接続するクライアント
+-ign_eof
+    入力まで処理したときに接続を阻害する
+$ echo "jN2kgmIXJ6fShzhT2avhotn4Zcka6tnt" | openssl s_client -connect localhost:30001 -ign_eof
+
+Correct!
+JQttfApK4SeyHwDlI9SXGR50qclOAil1
+```
+
+## level16
+```
+$ nmap -p31000-32000 localhost
+Starting Nmap 7.80 ( https://nmap.org ) at 2023-11-11 05:55 UTC
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.00043s latency).
+Not shown: 995 closed ports
+PORT      STATE SERVICE
+31000/tcp open  unknown
+31046/tcp open  unknown
+31518/tcp open  unknown
+31691/tcp open  unknown
+31790/tcp open  unknown
+31960/tcp open  unknown
+
+SSL対応というのでopenssl s_clientで接続する
+$ openssl s_client -connect localhost:31046
+No client certificate CA names sent
+
+$ echo "JQttfApK4SeyHwDlI9SXGR50qclOAil1" | openssl s_client -connect localhost:31790 -ign_eof
+sshを得た
+
+$ sudo vim ~/.ssh/bandit17_rsa
+
+id_rsa以外の場合は、ssh接続時に-iオプションを使う
+$ ssh bandit17@bandit.labs.overthewire.org -p 2220 ~/.ssh/bandit17_rsa
+```
+
+## level17
+```
+$ diff passwords.new passwords.old
+42c42
+< hga5tuuCLF6fFzUpnagiMN8ssu9LFrdg
+---
+> p6ggwdNHncnmCNxuAt0KtKVq185ZU7AW
+```
+
+## level18
+```
+sshでリモートマシンのコマンドを実行したい
+
+ssh [-l user] [-p port] host [command]
+
+$ ssh bandit18@bandit.labs.overthewire.org -p 2220 cat readme
+awhqfNnAbc1naukrpqDYcF95h7HoMTrC
+```
+
+## level19
+```
+・setuidパーミッションが設定されたプログラムは、その所有者のユーザーIDで実行される
+・実行するにはプログラムをコマンドラインで実行すればいい
+・つまり、今回の場合、bandit20が所有者なのでbandit20として、以降のコマンドが実行される(ls -l)
+
+$ ls -l /etc/bandit_pass/bandit20
+-r-------- 1 bandit20 bandit20 33 Oct  5 06:19 /etc/bandit_pass/bandit20
+
+$ ./bandit20-do
+Run a command as another user.
+  Example: ./bandit20-do id
+
+$ strings bandit20-do
+Run a command as another user.
+  Example: %s id
+
+$ ./bandit20-do cat /etc/bandit_pass/bandit20
+VxCazJaVykI6W36BkBU0mJTCM8rR95XT
+
+```
