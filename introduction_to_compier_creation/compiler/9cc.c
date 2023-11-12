@@ -188,14 +188,14 @@ Node *mul(){
 }
 
 Node *primary(){
+  //consumeで記号を予測する
   if(consume('(')){
     Node *node = expr();
     expect(')');
     return node;
   }
 
-  return
-  new_num(expect_number());
+  return new_num(expect_number());
 }
 
 void gen(Node *node){
@@ -203,7 +203,7 @@ void gen(Node *node){
     printf("  push %d\n", node->val);
     return;
   }
-
+  //左優先で探索(式の形にならこっちに来る)
   gen(node->lhs);
   gen(node->rhs);
 
@@ -237,7 +237,9 @@ int main(int argc, char **argv){
   }
   //記号と数値を分離
   user_input = argv[1];
+  //Token同士をつなげる
   token = tokenize();
+  //Nodeを生成しつなげる(これはlhsとrhsを持つ:ルートのNodeが返る)
   Node *node = expr();
 
   //アセンブリの前半部分を出力
@@ -249,7 +251,7 @@ int main(int argc, char **argv){
   gen(node);
 
 
-  printf("  pop rax\n");
+  printf("  pop rax\n"); //戻り値をraxに
   printf("  ret\n");
   return 0;
 }
