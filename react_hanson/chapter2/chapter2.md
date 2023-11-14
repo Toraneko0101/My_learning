@@ -321,3 +321,130 @@ https://babeljs.io/repl
 ・JSX等も変換してくれる
 ```
 
+# 2.4 オブジェクトと配列
+
+## 2.4.1 デストラクチャリング
+```
+デストラクチャリング
+    ・オブジェクトを変数に代入したり、引数として受け取る際に、
+    　必要なプロパティのみ取捨選択できる機能
+```
+
+- 例
+```js
+const sandwich = {
+    bread: "yamazaki",
+    meat: "beef",
+    cheese: "swiss",
+    toppings: ["tomato", "orange"]
+};
+
+const {bread, meat} = sandwich;
+console.log(bread, meat);
+```
+- 説明
+```
+オブジェクトを分解して、
+通常プロパティとしてsandwich.breadと取らなければいけなかったものを
+ローカル変数に代入している。
+代入の際は別のキーワード（たとえばlet）を使ってもよい
+
+```
+
+- 関数の引数にデストラクチャリングを使う
+```js
+//本来だったらprint = regularPersonで,${regularPerson.firstname}としていたので簡潔になっている
+const print = ({firstname}) =>{
+    console.log(`firstname is ${firstname}`);
+}
+
+const regularPerson = {
+    firstname: "Bill",
+    lastname : "Wilson"
+};
+//呼ぶときは関数名
+print(regularPerson);
+```
+
+- オブジェクトの深いレベルのプロパティを、デストラクチャリングで簡単にアクセスする
+```js
+const regularPerson = {
+    firstname: "Bill",
+    lastname : "wilson",
+    features : {
+        race: "human",
+        height: "174cm"
+    }
+};
+
+const hoge = ({features : {race}}) =>{
+    console.log(`race is ${race}`);
+};
+
+hoge(regularPerson);
+```
+
+- 説明
+```
+{features : {race}}のように波括弧をネストさせてプロパティを指定することで、
+オブジェクトの深部にあるプロパティを選択して取得可能
+```
+
+## 2.4.2 配列のデストラクチャリング
+```js
+const [firstElement] = ["Neko", "Inu", "Nezumi"];
+console.log(firstElement);
+//カンマで不要な要素を読み飛ばす
+a = ["Neko", "Inu", "Nezumi"]
+const [, , thirdElement] = a;
+console.log(thirdElement);
+
+```
+
+## 2.4.3 オブジェクトリテラルの改善
+- プロパティ名の省略
+```js
+//変数をオブジェクトのプロパティ値として記述する場合、プロパティ名の省略が可能に
+//関数もそのままプロパティとして記述可能
+const name = "Neko";
+const age = 134;
+const print = function(){
+    console.log(`Mister ${this.name} is ${this.age} years old.`);
+}
+const data = {name: name, age: age};
+const data2 = {name, age, print};
+data2.print();
+```
+- オブジェクト内に関数を記載する際の、function省略
+```js
+name = "Neko";
+height = 173;
+const Animal = {
+    name,
+    height,
+    fuga(){
+        let upper = this.name.toUpperCase();
+        console.log(upper);
+    }
+};
+Animal.fuga();
+```
+
+## 2.4.4 スプレッド構文
+- 配列の連結
+```js
+const peaks = ["Fuji", "Tateyama", "Kinkazan"];
+const vallay = ["Kurobe", "Geibikei", "Kawaura"];
+const Nature = [...peaks, ...vallay];//この時点でリスト連結
+console.log(Nature.join(", "))
+
+```
+- イミュータブルな配列の実現
+```js
+const peaks = ["Fuji", "Tateyama", "Kinkazan"];
+//const [last] = peaks.reverse(); 
+const [last] = [...peaks].reverse();
+//reverseは破壊的な処理なので、[...peaks]でコピーを作成し、
+//これをreverseすることで防ぐ
+console.log(last);
+```
