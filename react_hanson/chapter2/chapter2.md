@@ -280,3 +280,44 @@ console.log(test.func());
 ```
 
 # 2.3 Javascriptのコンパイル
+```
+・ブラウザで機能が実装される前に使いたい場合
+・新しい構文で記述されたコードを、古い構文で記述されたコードに変換する
+・この前工程は、コンパイル、またはトランスパイルと呼ばれる
+```
+- JSをコンパイルするためのツール
+```
+Babel
+    ・この登場以降はコンパイルしてから実行するのが当然になった
+```
+
+- ES6 => ES5へのコンパイル
+```js
+const add = (x=5, y=10) => console.log(x+y); 
+
+//Babelによる変換
+"use strict"
+var add = function add(){
+    var x = 
+        arguments.length <= 0 || arguments[0] === undefined ? 5 : arguments[0];
+    var y = 
+        arguments.length <= 1 || arguments[1] === undefined ? 5 : arguments[1];
+    
+    return console.log(x + y);
+}
+```
+- 説明
+```
+"use strict"
+    以降のコードがstricモードで実行されることを宣言
+あとは、関数式に置き換えて、三項演算子で、デフォルト引数のロジックを再現している。
+```
+
+- Babel REPL
+```
+https://babeljs.io/repl
+・JSを記述すると、コンパイルした結果を表示してくれる。
+・BabelはwebpackやParcel等のツールに統合されており、通常の場合、コンパイルの処理はツールで自動化されている
+・JSX等も変換してくれる
+```
+
