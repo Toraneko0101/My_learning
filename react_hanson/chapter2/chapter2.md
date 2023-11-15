@@ -447,4 +447,220 @@ const [last] = [...peaks].reverse();
 //reverseは破壊的な処理なので、[...peaks]でコピーを作成し、
 //これをreverseすることで防ぐ
 console.log(last);
+console.log(peaks.join(", "))
+```
+
+- 配列の残り要素を表現する
+```js
+const lakes = ["kawanaka", "towada", "biwa", "hamana"];
+const [first, ...others] = lakes;
+console.log(others.join(", "));
+```
+
+- 関数の引数を配列として受け取る・残余引数
+```js
+function directions(...args){
+    let [start, ...remaining] = args;
+    let [finish, ...stops] = remaining.reverse();
+
+    console.log(`drive through ${args.length} towns`);
+    console.log(`start in ${start}`);
+    console.log(`finish is ${finish}`);
+    console.log(`stopping city is ${stops.join(", ")}`);
+} 
+
+directions("Okinawa", "Ooita", "Hokkaido","Gihu");
+```
+
+- オブジェクトで見るスプレッド構文
+```js
+//中身を一度に受け取れている
+const morning = {
+    breakfast: "oatmeal",
+    lunch : "peanut butter and strawberry jum"
+};
+
+const dinner = "mac and cheese burger";
+const backpackingMeals = {
+    ...morning,
+    dinner
+};
+
+console.log(backpackingMeals);
+```
+
+# 2.5 JavaScriptと非同期処理
+```js
+//同期処理
+const neko = document.querySelector("#neko");
+neko.innerHTML = "Nyanko!";
+
+//データベースアクセス,API呼びだし、映像や音楽再生など
+//待ちが発生する処理は非同期で実行される必要がある
+```
+
+## 2.5.1 Promiseとfetch
+```
+fetch
+    HTTPのリクエストを送信してresponseを受信するためのJS API
+    REST APIの呼び出し簡潔化の立役者
+
+console.log(fetch("https://api.randomuser.me/?nat=US&results=1"));
+    戻り値をログ出力すると、APIのレスポンスではなく、Pending(保留中)のPromiseオブジェクトが確認できる
+
+Promise
+    Resolved:成功
+    Pending:保留
+    Rejected:失敗
+
+    ・保留中はデータ取得が完了していない状態を示す
+    ・thenメソッドを使うことでメソッドチェーンを記述できる
+    ・thenメソッドはコールバック関数を引数にとる
+    ・直前の非同期処理が成功するとコールバックがよばれる
+    ・コールバック関数でさらに戻り値を返した場合は、Promiseチェーンの次のthenのコールバック関数に引き継がれる
+```
+
+- コールバックの例
+```js
+//1. randomuser.meにGETリクエストを送信
+//2. 呼び出しが成功すればresponseのbody文字列をJSONオブジェクトに変換
+//3. JSONオブジェクトのresultsプロパティを取りだす
+//4. 取り出した値をコンソール出力
+//5. どこかでエラーが発生したらconsole.errorでコンソールにエラー出力
+fetch("https://api.randomuser.me/?nat=US&results=1")
+    .then(res => res.json())
+    //.then(json =>{
+    //     console.log(json.results);
+    // })
+    .then(json => json.results)
+    .then(console.log)
+    .catch(console.error);
+```
+
+## 2.5.2 async/await
+```
+async
+    ・非同期関数を同期関数のように呼び出せる
+    ・Promiseオブジェクトを受け取り、thenメソッドで値を取り出す代わりにawaitキーワードを書く
+    ⇒Promiseが成功するまで処理は待たされる
+```
+- 例
+```js
+//catchブロックがないと、エラーが発生した場合PromiseStateエラーとなる
+//awaitで呼び出した非同期関数内でPromiseが失敗する可能性が
+//あるときは、関数呼び出しをtry/catchで囲む
+const getFakePerson = async () => {
+    try{
+       const res = await fetch("https://api.randomuser.me/?nat=US&results=1");
+       const {results} = await res.json();
+       console.log(results);
+    }catch(error){
+        console.error(`Failed to fetch: ${error}`);
+    }
+};
+
+getFakePerson();
+```
+- 注意
+```
+Cross-Origin Resource Sharing
+    ・異なるオリジンからのリソースへのアクセスをブラウザは制限する。
+    ・つまり、ホスト名とポート番号の組み合わせ（オリジン）が異なるページで上記のURL関連のfetchをするとCORSがセキュリティ制限の件で怒ってくる
+```
+
+## 2.5.3 Promiseの生成
+```
+・データを取得するために複数のAPIを呼び出す必要がある場合エラーの種類が複数あるが、そのような状態を単純化したい
+```
+
+- AJAXの呼び出しを、Promiseオブジェクトにラップ
+```js
+const getFakeMemvers = count =>
+    //Promiseを返す。1つのオブジェクトなので{}はなし。
+    new Promise((resolves, rejects) =>{
+        const api = `https://api.randomuser.me/?nat=US&results=${count}`;
+        const request = new XMLHttpRequest();
+        request.open("GET", api);
+        request.onload = () =>
+            //200ならresolvesを呼ぶ
+            request.status == 200
+                ? resolves(JSON.parse(request.response).results)
+                : reject(Error(request.statusText));
+            request.onerror = err => rejects(err);
+            request.send();
+    })
+
+//then/catchメソッドによるエラー処理
+getFakeMembers(5)
+    .then(members => console.log(members))
+    .catch(error => console.error(`getFakeMembers failed: ${error.message}`));
+
+//try/catchによるエラー処理
+async function testGetFakeMembers(){
+    try{
+        const members = await getFakeMembers(5);
+        console.log(members)
+    }catch (error){
+        console.error(`getFakeMembers failed: ${error.message}`);
+    }
+}
+```
+
+# 2.6 クラス宣言
+```
+・JSでは全てのオブジェクトはプロトタイプと呼ばれるプロパティを持つ。プロパティを用いて継承が実現される⇒プロトタイプ継承
+```
+- classキーワードを使用しないカスタムクラス
+```js
+function Vacation(destination, length){
+    this.destination = destination;
+    this.length = length;
+}
+
+Vacation.prototype.print = function(){
+    console.log(this.destination + " | " + this.length + " days");
+
+}
+var maui = new Vacation("Maui", 7);
+maui.print();
+```
+- 解説
+```
+new演算子でインスタンス化される際に、初期値を受け取る
+Vacationはprintというメソッドを持つが
+インスタンスはprototypeオブジェクト上にあるprintを継承するので以上のような奇妙な書き方になる
+```
+
+- classキーワードを使ったもの
+```js
+class Vacation{
+    constructor(destination, length){
+        this.destination = destination;
+        this.length = length;
+    }
+
+    print(){
+        console.log(`${this.destination} will take ${this.length} days.`)
+    }
+}
+
+const trip = new Vacation("Santiago", 21);
+trip.print();
+```
+- 注意点
+```
+classキーワードは糖衣構文
+    内部的には依然としてクラスの実態はコンストラクタ関数
+    prototypeにより継承が実現される
+```
+
+- extendsで継承する
+```js
+class Expedition extends Vacation{
+    constructor(destination, length, gear){
+        super(destination, length);
+        this.gear = gear;
+    }
+    
+}
 ```
