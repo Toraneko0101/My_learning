@@ -180,3 +180,226 @@ render(<Welcome />, document.getElementById("target"));
 ```
 
 # 3.3 関数型プログラミングの基本概念
+
+## 3.3.1 イミュータブルなデータ
+```
+・関数型プログラミングではすべてのデータはimmutable
+・変更を加えることはできない？
+・関数型プログラミングではデータに変更を加える際、必ずコピーを作成してから変更するらしい
+```
+
+- mutableの例
+```js
+let color_lawn = {
+    title : "lawn",
+    color : "#00FF00",
+    rating : 0
+};
+
+//関数の引数としてobjを受け取っているので、
+//実際のobjが参照されており、当然書き換えられる
+function rateColor(color, rating){
+    color.rating = rating;
+    return color;
+}
+//colorを書き換えたものを返して、そのプロパティを参照する
+console.log(rateColor(color_lawn, 5).rating);
+console.log(color_lawn.rating) //5
+```
+
+- 原本を書き換えたくないのでimmutableにする(Object.assign)
+```js
+let color_lawn = {
+    title : "lawn",
+    color : "#00FF00",
+    rating : 0
+};
+function rateColor(color, rating){
+    return Object.assign({}, color, {rating: rating});
+};
+
+console.log(rateColor(color_lawn, 5).rating);
+console.log(color_lawn.rating);
+```
+
+- 説明
+```
+Object.assignの第1引数に空オブジェクトを渡す
+    ⇒新規に作成されたobjの方に対して変更を加えられる
+    ⇒引数にはcolor_lawnを取っているが、元のobjの値は変更されない
+
+```
+
+- スプレッド構文を使って、簡潔にimmutableを作る(...でcopy作成)
+```js
+let color_lawn = {
+    title : "lawn",
+    color : "#00FF00",
+    rating : 0
+};
+
+//objをrtnするので、()で囲むことに注意
+const rateColor = (color, rating) =>({
+    ...color,
+    rating
+})
+
+console.log(rateColor(color_lawn, 5).rating);
+console.log(color_lawn.rating);
+```
+
+- immutableな配列
+```js
+let list = [
+    {title : "red"},
+    {title : "lawn"},
+    {title : "pink"}
+];
+
+//破壊的
+// const addColor = function(title, colors){
+//     colors.push({title : title});
+//     return colors;
+// }
+
+// console.log(addColor("green", list).length);
+
+//immutable(Array.concat)　新しい要素を受け取り配列に追加
+const addColor = (title, array) => array.concat({title})
+console.log(addColor("green", list).length);
+console.log(list.length);
+
+//スプレッド構文(list自体がrtnされる)
+//スプレッド構文で新しいlistを作成し、その後ろにtitleを追加している感じ(cpしたものに追加しているのでもちろんimmutable)
+const addColor = (title, list) => [...list, {title}];
+console.log(addColor("green", list)[0]);
+```
+
+- 感想
+```
+スプレッド構文の方が直感的
+```
+
+## 3.3.2 純粋関数
+```
+純粋関数
+    引数の値のみを参照し、それをもとに計算し値を返すもの
+    副作用はなく、グローバル関数に値を書き込むことはない
+    引数をimmutableなデータとして扱う
+```
+
+- ※純粋ではない関数
+```js
+const frederick = {
+    name : "Frederick",
+    canRead : false,
+    canWrite : false
+};
+
+function selfEducate(){
+    frederick.canRead = true;
+    frederick.canWrite = true;
+}
+
+//関数の中身が変わってしまう
+selfEducate();
+console.log(frederick);
+```
+
+- 純粋関数(引数をimmutableにした)
+```js
+const frederick = {
+    name : "frederick",
+    canRead : false,
+    canWrite : false
+};
+
+//...personを返している。そのうえで、属性を変化させている
+const selfEducate = (person) => ({
+    ...person,
+    canRead: true,
+    canWrite: true
+})
+
+console.log(selfEducate(frederick));
+console.log(frederick);
+```
+
+- DOMを操作する例で考える
+```js
+//純粋ではない書き方
+
+function Header(text){
+    let h1 = document.createElement("h1");
+    h1.innerText = text;
+    document.body.appendChild(h1);
+}
+
+Header("ヘッダ関数は副作用を発生させる");
+```
+- Reactの場合
+```
+・上記の場合は、関数内でDOMに変更を加えており、副作用がある
+・ReactはUIコンポーネントが純粋関数として表現される
+・例は下に示す通り
+・作成した要素を戻り値として返却しており、関数内でappendChildなどをしていない。要素の使用法は上位のアプリにゆだねられている
+```
+```js
+const Header = props => <h1>{props.title}</h1>
+```
+
+- 純粋関数の利点と注意点
+```
+1. アプリケーションの状態を変更しないという利点がある
+2. 純粋関数は関数型プログラミングの中心的概念である
+3. 純粋関数はテストを容易にする。⇒環境に変更を加えないので
+
+4. 関数は少なくとも一つの引数を受け取る必要があり、また引数以外の値を参照してはいけない
+5. 関数は値もしくは他の関数を戻り値として返却する必要がある
+6. 関数は引数や関数外で定義された変数に直接変更を加えてはならない
+```
+
+## 3.3.3 データの変換
+```
+・関数型プログラミングではアプリのデータは変化しない
+・個々の関数はdataのコピーを作成し、それに変更を加えて、変更を加えたコピーを別の関数に渡していく
+```
+
+- データ変換のためにArray.mapとArray.reduceを使う
+```js
+const schools = ["Waseda", "Tokyo", "Hokkaido"];
+//Array.joinは非破壊的
+console.log(schools.join(", "));
+
+//Array.filterで絞り込む
+const wSchools = schools.filter(school => school[0] === "W");
+console.log(wSchools);
+```
+- Array.filterの説明
+```
+・配列のサブセットを新しい配列として返す
+・predicateを引数にとる
+
+predicate
+    ・引数に配列の要素を取る
+    ・真偽値を返すコールバック関数
+    ・それぞれの要素ごとにpredicateが呼ばれる
+    ・predicateの戻り値が要素を最終的にサブセットに吹く前るかどうかを決めるために使用される
+
+配列から要素を削除する際
+    Array.pop, Array.splice => 破壊的
+    Array.filter => 非破壊的
+```
+
+- Array.filterで配列から要素を削除する例
+```js
+const schools = ["Waseda", "Tokyo", "Hokkaido"];
+const cutSchool = (cut, list) =>{
+    //listの要素を1つずつをschoolに代入
+    return list.filter(school => school !== cut);
+};
+
+console.log(cutSchool("Hokkaido", schools).join(", "));
+```
+
+- Array.map
