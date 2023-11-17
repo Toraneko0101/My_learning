@@ -659,8 +659,101 @@ classキーワードは糖衣構文
 class Expedition extends Vacation{
     constructor(destination, length, gear){
         super(destination, length);
-        this.gear = gear;
+        this.gear = gear;//listが入る
+    }
+
+    print(){
+        super.print();
+        console.log(`Bring your ${this.gear.join(" and your ")}`)
     }
     
 }
+
+//呼び出し
+const trip = new Expedition("Mt.Whitney", 3,[
+    "one",
+    "tow",
+    "three"
+]);
+
+trip.print();
+```
+
+# 2.7 ECMAScriptモジュール
+```
+・jsにとって、モジュールは再利用可能なコード
+・他のjsファイルからimportして使う
+・個々のモジュールは別のファイルに格納されており、名前空間が独立しているので、モジュール間で変数名が重複していても衝突は起きない。
+・一つのモジュールから複数のオブジェクトをexportすることも可能
+```
+
+- 二つのオブジェクトをエクスポートする例
+```js
+/*./two_obj*/
+export const print = message => log(message, date());
+export const log = (message, timestamp) =>
+    console.log(`${timestamp.toString()}: ${message}`);
+//引数はなし
+const date = () => new Date();
+```
+- 単一のオブジェクトをエクスポートする例
+```js
+/*./one_obj */
+export default new Expedition("Neko", 2, ["water", "orange"]);
+```
+
+- import側のコード
+```js
+import {print , log } from "./two_obj";
+import freel from "./one_obj";
+
+print("print message");
+log("logging message");
+freel.print();
+```
+- defaultキーワードの意味
+```
+・defaultがない方では、デストラクチャリングを使用して複数の値を受け取っている。
+・defaultの方では、単一の変数を使ってimportされている。またimportする名前は上記の通り、任意のもので許される
+⇒import側が自由に設定できるので、リファクタリングしにくい
+```
+- defaultがなくとも、asを使えば別名で可能
+```js
+import {print as p, log as l} from "./two_obj";
+p("print message");
+l("logging a message");
+```
+
+- exportされたすべての値を単一のオブジェクトで受け取る
+```js
+import * as fns from "./two_obj";
+// fns.print(), fns.log();
+```
+- 説明
+```
+importとexportはESMと呼ばれる仕様の一部
+全ての機能が実装されていない場合はBabelを使って吸収する
+```
+
+## 2.7.1 CommonJSモジュール
+```
+・ECMAScriptモジュールが登場する前からNode.jsではCommonJSというモジュールパターンが採用されていた。
+・BabelやwebpackではこのCommonJSがサポートされている
+・CommonJSではmodule.exportsという特別なオブジェクト経由でモジュールをexportする
+```
+- CommonJSモジュールとして、先ほどのprint関数をexportする
+```js
+//export
+const print = message => log(message, new Date());
+const log = (message, timestamp) =>
+    console.log(`${timestamp.toString()}: ${message}`);
+
+module.exports = {print, log};
+
+//import 
+const {log, print} = require("./hoge.js")
+```
+- 説明
+```
+・import時には、require関数を使う
 ```
