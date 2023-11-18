@@ -403,3 +403,92 @@ console.log(cutSchool("Hokkaido", schools).join(", "));
 ```
 
 - Array.map
+```
+・コールバック関数を引数にとる
+・コールバック関数は配列の要素の数だけ呼び出される
+・戻り値は新しい配列に追加される
+```
+```js
+schools = ["Neko", "Nezumi", "Inu"];
+const highSchools = schools.map(school => `${school} High School `);
+console.log(highSchools.join("\n"));
+// Neko High School 
+// Nezumi High School 
+// Inu High School 
+console.log(schools.join("\n"));
+// Neko
+// Nezumi
+// Inu
+```
+- Array.mapを使って、オブジェクトの配列を作成する
+```js
+schools = ["Neko", "Nezumi", "Inu"];
+//objを返すので()で囲んでいる。返したものを集めてlistを作る
+const highSchools = schools.map(school => ({name : school}));
+console.log(highSchools);
+// [
+//     {name : "Neko"},
+//     {name : "Nezumi"},
+//     {name : "Inu"},
+// ]
+```
+- 配列のうち、1つの要素だけを変更する
+```js
+const schools = [
+    {name : "Maibara"},
+    {name : "Hogehoge"},
+    {name : "Umintyu"}
+];
+
+//三項演算子を使って簡潔に書く
+const editName = (oldName, name, arr) =>
+    arr.map(item => (
+        item.name === oldName ? 
+        {...item, name} :
+        item
+    ));
+// const editName = (oldName, name, arr) =>{
+//     return arr.map(item =>{
+//         //mapに対してreturnする
+//         if(item.name == oldName){
+//             return {
+//                 ...item,
+//                 name : name // name
+//             };
+//         }else{
+//             return item;
+//         }
+//     });
+// }
+
+const updatedSchools = editName("Hogehoge", "Fugafuga", schools);
+console.log(updatedSchools[1]);
+// {name: 'Fugafuga'}
+console.log(schools[1]);
+// {name: 'Hogehoge'}
+
+```
+- オブジェクトから配列を得る
+```js
+//Array.map + Object.keys(objに含まれるすべてのキーを配列として返す)
+
+const animals = {
+    Neko: 12,
+    Nezumi : 3,
+    Nekomata: 113
+};
+
+//keys(配列)に対してmapを行っているだけ
+const animalArray = Object.keys(animals).map(key =>({
+    name : key,
+    ages : animals[key] //val
+}));
+
+console.log(animalArray);
+// [
+//   {name: 'Neko', ages: 12}
+//   {name: 'Nezumi', ages: 3}
+//   {name: 'Nekomata', ages: 113}
+// ]
+```
+- 配列から単一の値への変換＾
