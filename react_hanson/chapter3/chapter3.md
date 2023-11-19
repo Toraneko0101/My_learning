@@ -491,4 +491,30 @@ console.log(animalArray);
 //   {name: 'Nekomata', ages: 113}
 // ]
 ```
-- 配列から単一の値への変換＾
+- 配列から単一の値への変換
+```js
+//Array.reduceを使う(Array.reduceRight:配列を末尾から走査)
+const ages = [4,23,123,43,321,12];
+const MaxAge = ages.reduce((max, age)=>{
+    console.log(`${age} > ${max} = ${age > max}`);
+    if(age > max) return age;
+    else return max;
+}, 0);
+console.log("maxAge", MaxAge);
+
+/*
+const result = array.reduce((prevValue, currentValue, currentIndex, array) =>{
+    return prevValue
+}, initialValue)
+*/
+
+//returnされた値が、次の第一引数に入る感じ
+const ages = [4,23,123,43,321,12];
+const MaxAge = ages.reduce((max, age, index, ages)=>{
+    console.log(index);
+    if(age > max) return age;
+    else return max;
+},0)
+console.log(MaxAge);
+```
+- Array.reduceで配列をobjに変換する
