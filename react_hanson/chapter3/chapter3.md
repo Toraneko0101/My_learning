@@ -518,3 +518,54 @@ const MaxAge = ages.reduce((max, age, index, ages)=>{
 console.log(MaxAge);
 ```
 - Array.reduceで配列をobjに変換する
+
+```js
+const colors = [
+    {
+        id: "xekare",
+        title : "rad red",
+        rating : 3
+    },
+    {
+        id : "jbwsof",
+        title : "big blue",
+        rating : 2
+    },
+    {
+        id : "nekoneko",
+        title : "banana",
+        rating : 1
+    }
+];
+
+const hashColors = colors.reduce((hash, {id, title, rating})=>{
+    hash[id] = {title, rating};
+    return hash;
+}, {});
+console.log(hashColors);
+```
+- 説明
+```
+・今回は初期値が空オブジェクト{}
+・オブジェクトに対してプロパティ値を、ブラケット表記を使って代入。
+```
+
+- 配列を異なる配列に変換
+```js
+const colors = ["red", "red", "green", "blue", "green"];
+
+const uniqueColors = colors.reduce(
+    (unique, color) =>
+        unique.indexOf(color) !== -1 ? unique : [...unique, color],
+        []
+);
+
+console.log(uniqueColors);
+```
+- 説明
+```
+・初期値が[]
+・unique.indexOf(color)でunique内にcolorがなければ-1になる。
+・つまり、あればそのままuniqueを返し、なければ、要素を追加したものを返す
+・結果的に重複が取り除かれた配列が生成できた
+```
