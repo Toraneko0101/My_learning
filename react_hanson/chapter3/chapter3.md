@@ -569,3 +569,294 @@ console.log(uniqueColors);
 ・つまり、あればそのままuniqueを返し、なければ、要素を追加したものを返す
 ・結果的に重複が取り除かれた配列が生成できた
 ```
+
+## 3.3.4 高階関数
+```
+・他の関数を引数に取るか、戻り値として関数を返すか、あるいはその両方を満たす関数
+
+・Array.map, filter, reduceは関数を引数にとるのですべて高階関数
+```
+
+```js
+const invokeIf = (condition, fnTrue, fnFalse) =>
+    condition ? fnTrue() : fnFalse();
+
+const showWelcome = () => console.log("Welcome!!!");
+const showUnauthorized = () => console.log("Unauthorized!!!");
+
+
+invokeIf(true, showWelcome, showUnauthorized);//Welcome
+invokeIf(false, showWelcome, showUnauthorized);//Unauthorized
+```
+- 解説
+```
+・invokeIfはfnTrue,fnFlaseという2つのコールバック関数を引数にとる。
+・戻り値として関数を返す高階関数の使い道は？
+⇒非同期処理による複雑化の低減。その場で処理を実行せずに、関数として返却することで実行のタイミングを呼び出し元にゆだねる。
+```
+- カリー化
+```
+・関数を引数にとるが、その時点では必要な情報がすべてそろっていないので処理実行の代わりに、関数を返却。
+・呼び出し元は、いったん関数を受け取り、後程情報が入手できた時点で、関数を呼び出す。
+```
+
+- コード
+```js
+
+const userLogs = userName => message =>
+    console.log(`${userName} -> ${message}`);
+//この時点でlog関数を取得。必要な情報がそろっていないので関数を返却する。members => log(引数)の時点で埋まるので呼び出す。
+const log = userLogs("grandpa23");
+getFakeMembers(20).then(
+    members => log(`successfully loaded ${members.length} members`).catch(
+        error => log("encountered an error loading members")
+    )
+);
+```
+
+## 3.3.5　再帰
+```js
+const countdown = (value, fn) =>{
+    fn(value);
+    return value > 0 ? countdown(value-1, fn) : value;
+}
+
+countdown(10, value => console.log(value));
+```
+- 非同期にした再帰
+```js
+const countdown = (value, fn , delay = 1000) =>{
+    fn(value);
+    return value > 0
+    ? setTimeout(()=> countdown(value -1, fn, delay), delay)
+    : value;
+}
+
+const log = value => console.log(value);
+countdown(10, log);
+```
+- データ構造探索を再帰で行う
+```js
+const dan = {
+    type: "person",
+    data : {
+        gender : "male",
+        info : {
+            id : 22,
+            fullname : {
+                first: "Dan",
+                last : "Deacon"
+            }
+        }
+    }
+};
+
+const deepPick = (fields, object = {}) =>{
+    //一番上だけfirstに入れる
+    const [first, ...remaining] = fields.split(".");
+    console.log(first, remaining);
+    //最終的な要素を引き出す
+    return remaining.length
+        ? deepPick(remaining.join("."), object[first])
+        : object[first];
+};
+
+deepPick("type", dan);
+deepPick("data.info.fullname.first", dan);
+```
+
+## 3.3.6 関数の合成
+```
+・関数プログラミングではロジックは細分化され、一つの関数は一つのタスクのみを持つ
+・関数を組み合わせてアプリのロジックを記述する
+・関数を順番に、あるいは平行に呼び出したり、幾つかの関数呼び出しを束ねてより大きな関数を作ることで、アプリ全体を構築することを関数の合成と呼ぶ
+```
+- 連鎖
+```
+.を使って、連鎖的に関数呼び出しを行う
+```
+```js
+const template = "hh:mm:ss tt";
+const clockTime = template
+    .replace("hh", "03")
+    .replace("mm", "03")
+    .replace("ss", "33")
+    .replace("tt", "PM");
+
+console.log(clockTime); //03:03:33 PM
+```
+
+- スケールされるタイプとされないタイプ
+```js
+//複数の関数を合成すると読みにくくなる
+const both = date => appendAMPM(civilianHours(date));
+
+const both = compose(
+    civilianHours,
+    appendAMPM
+);
+both(new Date());
+
+const compose = (...fns) => arg =>
+    fns.reduce((composed, f) => f(composed), arg);
+    //(callback,initialValue)
+```
+- 説明
+```
+・引数はスプレッド構文で記述され、fnsとして渡される
+・compose関数は戻り値として関数を返し、この関数は単一の引数argを取る。
+・戻り値の関数を呼び出すことで、Array.reduceが呼び出される
+・そして配列fnsに格納された関数が順番に呼び出される
+
+```
+
+## 3.3.7 アプリケーションの構築
+- 時分秒と午前午後が表示されているデジタル時計（毎秒更新）
+```js
+//命令型
+
+//現在時刻を毎秒ログ出力する
+setInterval(logClockTime, 1000);
+
+function logClockTime(){
+    //フォーマットされた現在時刻を取得する
+    let time = getClockTime();
+    //consoleをclearしてからlog出力
+    console.clear();
+    console.log(time);
+}
+
+function getClockTime(){
+    let date = new Date();
+    let time = "";
+    //Dateオブジェクトを時刻を表すオブジェクトに変換
+    time = {
+        hours : date.getHours(),
+        minutes : date.getMinutes(),
+        seconds : date.getSeconds(),
+        ampm : "AM"
+    };
+
+    //午前午後を意識した時刻に変換
+    if(time.hours == 12){
+        time.ampm = "PM";
+    }else if(time.hours > 12){
+        time.ampm = "PM";
+        time.hours -= 12;
+    }
+    time.hours = ("00" + time.hours).slice(-2);
+    time.minutes = ("00" + time.minutes).slice(-2);
+    time.seconds = ("00" + time.seconds).slice(-2);
+
+    return `${time.hours}:${time.minutes}:${time.seconds}:${time.ampm}`;
+}
+```
+- 良くない理由
+```
+・1つの関数に多くのことをやらせすぎている
+・そのため冗長で複雑になっている
+・コメントを書く必要がある時点でそのコードはわかりにくい
+```
+- 関数型のアプローチ
+```js
+const compose = (...fns) => arg =>
+    fns.reduce((composed, f) => f(composed), arg);
+
+const oneSecond = () => 1000;
+const getCurrentTime = () => new Date();
+const clear = () => console.clear();
+const log = message => console.log(message);
+
+// SerializeClockTime
+//      Date_obj -> 時分秒のみ抽出
+// civilianHours
+//      時間を午前午後表記に
+// appendAMPM
+//      時間のobjに午前午後の文字列追加
+
+const serializeClockTime = date =>({
+    hours : date.getHours(),
+    minutes : date.getMinutes(),
+    seconds : date.getSeconds()
+})
+
+const civilianHours = clockTime =>({
+    ...clockTime,
+    hours : clockTime.hours > 12 ? clockTime.hours - 12 : clockTime.hours
+});
+
+const appendAMPM = clockTime =>({
+    ...clockTime,
+    ampm : clockTime.hours >= 12 ? "PM" : "AM"
+})
+/*
+display
+ 関数targetを引数にとり、時刻を表示する関数を戻り値として返す
+formatClock
+ 文字列を引数にとり、記号を実際の数値に置き換え
+prependZero
+　受け取った値が10未満なら先頭にゼロを付ける
+*/
+
+const display = target => time => target(time);
+const formatClock = format => time => 
+    format
+        .replace("hh", time.hours)
+        .replace("mm", time.minutes)
+        .replace("ss", time.seconds)
+        .replace("tt", time.ampm);
+
+const prependZero = key => clockTime =>({
+    ...clockTime,
+    [key] : clockTime[key] < 10 ? "0" + clockTime[key] : "" + clockTime[key]
+});
+
+//合成関数
+/*
+convertToCivilianTime
+    関数appendAMPMとcivilianHoursを合成
+    時間 -> 午前午後形式
+
+doubleDigits
+    prependZeroを合成。
+
+startTicking
+    全てを合成し、完成品をsetIntervalにセット
+*/
+//初期値有り
+// compose(f,g)(x) == f(g(x))
+const convertToCivilianTime = clockTime =>
+    compose(
+        appendAMPM,
+        civilianHours
+    )(clockTime);
+
+const doubleDigits = civilianTime =>
+    compose(
+        prependZero("hours"),
+        prependZero("minutes"),
+        prependZero("seconds")
+    )(civilianTime);
+
+const startTicking = () =>
+    setInterval(
+        compose(
+            clear,
+            getCurrentTime,
+            serializeClockTime,
+            convertToCivilianTime,
+            doubleDigits,
+            formatClock("hh:mm:ss tt"),
+            display(log)
+        ),
+        oneSecond()
+    );
+startTicking();
+
+```
+- 解説
+```
+・関数型の記載は全て純粋関数なので副作用はない
+・そのためスケーラビリティの点で優れる
+・テスト面でも役立つ。再利用性もGood
+```
