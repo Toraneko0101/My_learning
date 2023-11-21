@@ -80,5 +80,91 @@ React.createElement("h1", {id : "recipe-0"}, "Baked Salmon");
 ```
 - 説明
 ```
+・_owner, __store, $$typeofはReactで内部的に使用されるフィールド
+・key, ref : 後ほど
+・type: Reactに対して何の要素を作成するか
+・prpos: 要素に設定するデータと、子要素
+・⇒childernにネストした子要素を記述する
+
+※実際に。React.createElementの戻り値のobjectの中身をリテラルとして記述することはない。JSX等がよくつかわれる。
+```
+
+## 4.2.1 ReactDOMで要素をブラウザに描画
+```js
+const dish = React.createElement("h1", null, "Baked Salmon");
+
+ReactDOM.render(dish, document.getElementById("root"));
+```
+```html
+<body>
+    <div id="root">
+        <h1>Baked Salmon</h1>
+    </div>
+</body>
+```
+- 説明
+```
+・ReactDOM.renderを用いてReact要素とその子要素を描画している
+・renderの第1要素にReact要素を、第2引数に要素を追加するルートノードを記載する。
+・ver16以降なら、複数の要素をrenderに渡すことが可能
+```
+- 複数要素の描画
+```js
+const dish = React.createElement("h1", null, "Baked");
+const dessert = React.createElemenet("h2", null, "Pie");
+ReactDOM.render([dish, dessert], document.querySelector("#root"));
+```
+
+## 4.2.2 子要素(props.children)
+```
+・子要素はprops.childrenに格納される
+・他のReact要素を子要素として指定することも可能。
+・ネストした要素のツリーを構築する。
+```
+- 例
+```js
+React.createElement(
+    "ul",
+    null,//property
+    React.createElement("li", null, "parsley"),
+    React.createElement("li", null, "and"),
+    React.createElement("li", null, "sage"),
+    React.createElement("li", null, "and"),
+    React.createElement("li", null, "thyme")
+);
+
+console.log(list);
+
+//createElementの3番目以降の引数はすべて子要素とみなされる
+//任意の数の子要素を引数として渡すことが可能。
 
 ```
+
+- 少し大きなReactの要素を記述すzる。
+```js
+React.createElement(
+    "section",
+    {id : "baked-samon"},
+    React.createElement("h1", null, "Baked Salmon"),
+    React.createElement(
+        "ul",
+        {className: "ingredients"},
+        React.createElement("li", null, "2, lb salmon"),
+        React.createElement("li", null, "fresh rosemary"),
+        React.createElement("li", null, "small lemons")
+    ),
+    React createElement(
+        "section",
+        {className: "instructions"},
+        React.createElement("h2", null, "Cooking Instructions"),
+        React.createElement("p", null, "Samon boil"),
+        React.createElement("p", null, "Remove from oven")
+    ),
+);
+```
+- 説明
+```
+・ReactではclassはclassNameとなる。classが予約語なので
+```
+
+## 4.2.3 配列から子要素を作成する
