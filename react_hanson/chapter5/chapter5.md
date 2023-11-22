@@ -79,3 +79,47 @@
 ```
 
 ## 5.1.2 BabelによるJSXの変換
+```
+・JSXをサポートしているブラウザはない
+・また最新のJSの構文はサポートされていない可能性がある
+⇒Babelでコンパイル
+
+Babel
+    ・登場時は6to5という名前のコンパイルで、ES6をES5に変換していた。
+    ・今では最新のECMAScriptの構文を実行するプラットフォームであり、JSXのような拡張構文をサポートされている
+```
+
+- CDNで配布されているBabelのライブラリを読み込み実行する。
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>React Examples</title>
+    </head>
+
+    <!--ReactとReactDOM-->
+    <script
+        src="https://unpkg.com/react@16.8.6/umd/react.development.js">
+    </script>
+    <script
+        src="https://unpkg.com/react-dom@16.8.6/umd/react-dom.development.js">
+    </script>
+
+    <!--Babel-->
+    <script
+        src="https://unpkg.com/@babel/standalone/babel.min.js">
+    </script>
+
+    <script type="text/babel">
+        //ここにJSXを記述
+    </script>
+</html>
+```
+- 説明
+```
+・<script>タグ内に書かれており、type="text/babel"が指定されているものは、実行前に自動的にBabelによりコンパイルされる
+・変換のオーバーヘッドがあるので、ブラウザで簡単にテストしたいときにのみ使う
+※ブラウザでBabelを実行すると、プロダクション環境の場合は事前コンパイルしてという警告が出る。
+```
+
