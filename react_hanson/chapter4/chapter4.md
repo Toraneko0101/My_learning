@@ -192,4 +192,127 @@ ReactDOM.render(test, document.querySelector("#root"));
 ```
 
 # 4.3 Reactコンポーネント
+```
+・ユーザインタフェースはボタンやリスト、見出しといった部品で構成される。
+・この部品のことをReactではコンポーネントと呼ぶ
+・内容が異なっても使われているUI部品が同じなら流用できる
+・個々の部品はより大きな部品の一部となるので、まずは部品を分解するところから始める。
+・Reactではコンポーネントの実体は関数であり（関数以外でもできなくはないが）、各コンポーネントはReact要素を返す関数として実装される。
 
+※コンポーネントの設計ではスケールを必ず考える。コンポーネントを1万個作成しても大丈夫なように
+```
+- コンポーネントの例
+```js
+function IngredientsList(){
+    return React.createElement(
+        "ul",
+        {className : "ingredients"},
+        React.createElement("li", null, "salt butter"),
+        React.createElement("li", null, "peanut butter"),
+        React.createElement("li", null, "brown sugar"),
+        React.createElement("li", null, "eggs"),
+        React.createElement("li", null, "flour"),
+        React.createElement("li", null, "teaspoon salt")
+    );
+}
+
+ReactDOM.render(
+    React.createElement(IngredientsList, null, null),
+    document.querySelector("#root")
+);
+
+//関数名がcomponentの名前となる。出力はhtmlとなる。
+```
+- ハードコードしていたので、修正する
+```js
+const items = [
+    "salt butter",
+    "peanut butter",
+    "brown sugar",
+    "eggs",
+    "flour",
+    "teaspoon salt"
+];
+
+function IngredientsList(){
+    return React.createElement(
+        "ul",
+        {className : "ingredients"},
+        items.map((ingredient, i)=>{
+            React.createElement("li", {key : i}, ingredient)
+        })
+    );
+}
+
+ReactDOM.render(
+    //itemsプロパティに分離したデータを設定
+    React.createElement(IngredientsList, {items}, null),
+    document.querySelector("#root")
+);
+```
+- さらに改善する(itemesをpropsオブジェクト経由で渡す)
+```js
+function IngredientsList(props){
+    return React.createElement(
+        "ul",
+        {className : "ingredients"},
+        props.items.map((ingredient, i)=>{
+            return React.createElement("li", {key : i}, ingredient)
+        })
+    );
+} 
+```
+- デストラクチャリングを使う
+```js
+function IngredientsList({items}){
+    return React.createElement(
+        "ul",
+        {className : "ingredients"},
+        items.map((ingredient, i)=>{
+            return React.createElement("li", {key : i}, ingredient)
+        })
+    );
+} 
+```
+
+## 4.3.1 Reactコンポーネントの歴史
+```
+・Reactでcomponentを作成する方法はほかにもある
+```
+
+- 第1期: createClass
+```js
+const IngredientsList = React.createClass({
+    displayName : "IngredientsList",
+    render() {
+        return React.createElement(
+            "ul",
+            {className, "ingredients"},
+            this.props.items.map((ingredients, i)=>{
+                return React.createElement("li", {key : i}, ingredient)
+            })
+        );
+    }
+});
+```
+- 特徴
+```
+・コンポーネント名とrenderメソッドを定義する必要があった
+・renderメソッドはReact要素を返していた
+・React ver16では、React.createClassは廃止され、create-react-classという独立したパッケージとして提供されるようになった
+```
+- 第2期: クラスコンポーネント
+```js
+//これも将来的に廃止される予定
+class IngredientsList extends React.Component{
+    render(){
+        return React.createElement(
+            "ul",
+            {className: "ingredients"},
+            this.props.items.map((ingredient, i)=>{
+                return React.createElement("li", {key: i}, ingredient)
+            })
+        )
+    }:
+}
+```
