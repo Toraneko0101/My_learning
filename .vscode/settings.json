@@ -24,6 +24,7 @@
         "ranges": "cpp",
         "span": "cpp",
         "format": "cpp",
-        "stacktrace": "cpp"
+        "stacktrace": "cpp",
+        "cstdlib": "cpp"
     }
 }
