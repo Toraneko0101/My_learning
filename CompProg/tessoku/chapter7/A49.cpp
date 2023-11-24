@@ -51,7 +51,7 @@ void BeamSearch(){
             //操作Aの場合
             State SousaA = Beam[i-1][j];
             SousaA.LastMove = 'A';
-            SousaA.LastPos = j;
+            SousaA.LastPos = j; //前回の状態
             SousaA.X[P[i]] += 1;
             SousaA.X[Q[i]] += 1;
             SousaA.X[R[i]] += 1;
@@ -74,7 +74,7 @@ void BeamSearch(){
             Candidate.push_back(SousaA);
             Candidate.push_back(SousaB);
         }
-        //sortしてBeam[i]の結果を大きい順にする(比較対象は上で記述済み)
+        //sortして候補の結果を大きい順にする(比較対象は上で記述済み)
         sort(Candidate.begin(), Candidate.end(), greater<State>());
         NumState[i] = min(WIDTH, (int)Candidate.size()); //戻り値の型が違うのでキャスト, 最大WIDTHだけ残す
         for(int j = 0; j<NumState[i]; j++) Beam[i][j] = Candidate[j];
