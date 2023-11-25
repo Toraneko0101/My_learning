@@ -91,7 +91,10 @@ int main(){
     [](int x){ return x % 2 == 0; }
     );
     if(itr3 == a.end()) cout << "not found " << endl;
-    else cout << format("c[{}] = {} % 2 = 0\n", *itr3, c.at(*itr3));
+    else{
+        int kyori = distance(c.begin(), itr3);
+        cout << format("c[{}] = {} % 2 = 0\n", kyori, *itr3);
+    }
 
     //lower_boundもiteratorを返すので、autoを用意し、*iterとアクセスしていたわけ
     //見つからなかった場合に範囲の最後を返すのは一緒
