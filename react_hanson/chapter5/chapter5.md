@@ -327,3 +327,296 @@ Hot Module Replacement
 ```
 
 ## 5.3.1 プロジェクトの作成
+```
+1. プロジェクトを作成する
+2. レシピのアプリケーションを複数のコンポーネントに分割し、異なるファイルに記述
+3. appをwebpackでビルドできるようにする
+
+※普段はcreate-react-appでReactのプロジェクトを自動生成すればいい
+　コマンド実行により、設定済みのファイルが生成される
+```
+
+1. プロジェクトフォルダの構成
+```
+$ npm init -y //package.jsonの生成(-yでデフォルト値)
+$ npm install react react-dom serve //react, react-domのinstall
+
+```
+
+- 以下のようなディレクトリ構造にする
+```
+$ tree -I node_modules
+.
+├── data
+│   └── recipes.json
+├── index.html
+├── package-lock.json
+├── package.json
+└── src
+    ├── components
+    │   ├── Ingredient.js
+    │   ├── IngredientsList.js
+    │   ├── Instructions.js
+    │   ├── Menu.css
+    │   ├── Menu.js
+    │   └── Recipe.js
+    └── index.js
+```
+2. モジュール分割
+- index.js
+```js
+import React from "react";
+import {render} from "react-dom";
+import data from "../data/recipes.json"; //dataはここに格納
+import Menu from "./components/Menu";
+
+//Menuコンポーネントは以下で定義
+//recipesにはデータ全部を渡している
+render(
+    <Menu recipes={data} />, 
+    document.querySelector("root")
+);
+```
+- Menu.js
+```js
+import React from "react";
+import Recipe from "./Recipe";
+
+function Menu({recipes}){
+    return(
+        <article>
+            <header>
+                <h1>Delicious Recipes</h1>
+            </header>
+            <div className = "recipes">
+                {recipes.map((recipe, i)=>(
+                    <Recipe key={i} {...recipe} />
+                ))}
+            </div>
+        </article>
+    )
+};
+
+export default Menu;
+```
+- Recipe.js
+```js
+import React from "react";
+import IngredientsList from "./IngredientsList";
+import Instructions from "./Instructions";
+
+function Recipe({name, ingredients, steps}){
+    return(
+        <section id={name.toLowerCase().replace(/ /g, "-")}>
+            <h1>{name}</h1>
+            <IngredientsList list={ingredients} />
+            <Instructions title="Cooking Instructions" steps={steps} />
+        </section>
+    );
+}
+
+export default Recipe;
+```
+- Instructions.js
+```js
+import React from "react";
+
+/**
+ * 名前と、手順を受け取る
+ */
+export default function Instructions({title, steps}){
+    return(
+        <section className="instructions">
+            <h2>{title}</h2>
+           {/* 1行なのでreturnを省いている */}
+            {steps.map((s,i)=>(
+                <p key={i}>{s}</p>
+            ))}
+        </section>
+    );
+}
+```
+- IngredientsList.js
+```js
+import React from "react";
+import Ingredient from "./Ingredient";
+
+{/*ingredientsがlistとして渡される */}
+export default function IngredientsList({list}){
+    return(
+        <ul className = "ingredients">
+            {/* スプレッド構文で、ingredientの全プロパティを渡している*/}
+            {/*Ingredientに値を渡す */}
+            {list.map((ingredient, i)=>(
+                <Ingredient key={i} {...ingredient} />
+            ))}
+        </ul>
+    );
+}
+```
+- Ingredient.js
+```js
+import React from "react";
+
+/**
+ * デストラクチャリングを用いて、propsオブジェクトから
+ * amount, measurement, nameのデータを抽出
+ */
+export default function Ingredient({amount, measurement, name}){
+    return(
+        <li>
+            {amount} {measurement} {name}
+        </li>
+    );
+}
+```
+- 説明
+```
+・これらをwebpackでビルドする
+⇒ファイルに分割したモジュールを単一のファイルにできる
+
+・モジュールの分割はチームのためであり、ファイルが分かたれている方が効率があがる。
+・単一のファイルにビルドするのは、ブラウザで効率よくロードするため
+```
+
+3. ビルド環境の構築
+```
+$ npm install --save-dev webpack webpack-cli
+
+・dev-dependenciesに追加する
+```
+- 設定ファイルを記述する
+```
+・アプリを単一のファイルに結合するには、webpackに対して結合手順を教える必要がある
+・プロジェクトごとに設定ファイルを記述する(<=4.00なら設定ファイルナシでも可能だが、動作をカスタマイズしたい場合は必要)
+・設定ファイルはwebpack.config.jsでプロジェクトのrootに配置されている必要がある
+
+・webpackはファイルを読み、importを見つけた場合、対象のモジュールをファイルシステムから呼び出してバンドルに追加する
+・ファイルの読出しは連鎖的に行われれ、importのツリーをたどることで、必要なすべてのモジュールがバンドルに追加される
+・その過程で、依存モジュールのグラフが形成される
+・React等の外部ライブラリや画像なども依存モジュールとして扱われれる。
+・成果物がバンドルファイル
+
+webpack.config.js
+    ・単一のオブジェクトをexportするNode.jsのモジュール
+    ・webpackのふるまいを規定するためのparamが格納
+```
+- webpack.config.jsを直下に追加
+```js
+var path =  require("path");
+
+/**
+ * entryファイルを指定:ここを起点にimportをparseする
+ * output: 出力先（依存モジュールを単一のファイルに結合したもの）を指定 ./dist/assets/bundle.js
+ */
+module.exports = {
+    entry: "./src/index.js",
+    output: {
+        path: path.join(__dirname, "dist", "assets"),
+        filename: "bundle.js"
+    }
+};
+```
+- JSXをコンパイルするために、babelをinstallする
+```
+$ npm install babel-loader @babel/core --save-dev
+```
+- webpack.config.jsに追記
+```js
+var path =  require("path");
+
+/**
+ * entryファイルを指定:ここを起点にimportをparseする
+ * output: 出力先を指定 ./dist/assets/bundle.js
+ */
+module.exports = {
+    entry: "./src/index.js",
+    output: {
+        path: path.join(__dirname, "dist", "assets"),
+        filename: "bundle.js"
+    },
+
+    module:{
+        rules: [{test:/\.js$/, exclude: /node_modules/, loader: "babel-loader"}]
+    }
+};
+```
+- 説明
+```
+・moduleについてはmoduleフィールドに記載する
+・rulesフィールドは配列で使用するモジュールの設定値を記述する
+・今回はbabel-loaderの設定値のみを記述しチエル
+・testには処理対象のファイルを正規表現で指定
+⇒*.jsのファイルはすべて、babek-loaderに処理されるように
+・excludeには除外したいファイルを指定
+```
+- Babelのプリセットを指定する
+```
+・Babelのふるまいを変えるための設定
+⇒Babelの設定ファイルに記述する
+⇒Babelの設定ファイルは.babelrc
+```
+- プリセットをinstall
+```
+$ npm install @babel/preset-env @babel/preset-react --save-dev
+```
+- プリセットを.babelrcに記述
+```json
+{
+    "presets": ["@babel/preset-env","@babel/preset-react"]
+}
+```
+
+- ビルドを実行してみる
+```
+$ npx webpack --mode development
+
+・ここではwebpackは静的に実行されるので、アプリがサーバにデプロイされる前にあらかじめバンドルがビルドされている必要がある
+・出力先のdistはgitignoreに追加した
+```
+
+- 以降のビルドを楽にするために
+```js
+//package.jsonのscriptsセクションに、
+//本番用と記載
+"scripts": {
+  "build": "webpack --mode production"
+},
+
+// $ npm run buildとすることでwebpackの面倒な引数を指定する必要がなくなる
+```
+
+## 5.3.2 バンドルファイルのロード
+- ブラウザにロードする
+```
+・通常distフォルダには、webサーバで配信したファイルが置かれる
+・今回はdist直下にindex.htmlを作成し記述していく
+```
+- ロードするファイル
+```html
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>React Recipes App</title>
+    </head>
+    <body>
+        <div id="root"></div>
+        <!--1回のloadで済む-->
+        <script src="assets/bundle.js"></script>
+    </body>
+</html>
+```
+
+## 5.3.3 ソースマップ
+```
+・単一のファイルに依存モジュールをビルドすることのデメリットがデバッグが困難になること
+・これを解決するのがソースマップ
+・ソースマップはbandleのような変換後のコードと元のソースコードとの間で行番号をマッピングする
+・Sourcesタブの中で表示する
+⇒ブレークポイントを設定したりすることや、スコープ内の変数の値を参照したり、Watchで変数を登録して監視することも可能
+```
+- webpack.config.js
+```js
+    devtool : "inline-source-map"
+```
