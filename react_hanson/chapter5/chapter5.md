@@ -620,3 +620,13 @@ $ npx webpack --mode development
 ```js
     devtool : "inline-source-map"
 ```
+
+## 5.3.4 Create React App
+```
+・コマンドラインのツールで、実行することでwebpack, Babel, ESLint等の設定ファイルを自動生成する
+```
+- 使い方
+```
+//npxは実行ツール。installされていないpackageでも自動的に探してinstallし、実行し、実行後に削除する
+$ npx create-react-app my-project
+```
