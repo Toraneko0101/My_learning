@@ -630,3 +630,32 @@ $ npx webpack --mode development
 //npxは実行ツール。installされていないpackageでも自動的に探してinstallし、実行し、実行後に削除する
 $ npx create-react-app my-project
 ```
+
+- 自動生成されたもの
+```
+・ルートにはsrcがあり、App.jsが自動生成されている
+・react, react-dom, react-scriptsがinstallされている(package.jsonに記載済み)
+
+react-scripts
+    ・Facebookにより提供されている
+    。Babel, ESLint, webpack等が含まれている
+
+```
+- 起動
+```
+npm start
+    ブラウザが起動してアプリが表示される
+npm test
+    ユニットテストを実行
+    プロジェクトフォルダ内のすべてのテストを対話モードで実行
+
+npm run build (yarn build)
+    buildフォルダ配下にミニファイされたbundleファイルが出力 
+```
+
+- create-next-app
+```
+・next.jsが提供している、コマンド一つでwebアプリを実装してくれる機能
+$ npx create-next-app
+$ npm run dev
+```
