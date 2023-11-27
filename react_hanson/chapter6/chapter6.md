@@ -79,3 +79,94 @@ export default StarRating;
 useState
     ・コンポーネントにステートを追加したいときに使う
 ```
+- コード
+```js
+import React, {useState} from "react";
+import {FaStar} from "react-icons/fa";
+
+const Star = ({selected = false}) =>(
+    <FaStar color={selected ? "red" : "gray"} />
+);
+
+function StarRating({totalStars = 5}){
+    //ステートの現在値が格納
+    const [selectedStars] = useState(3);
+    //JSXの要素を含んだ配列を{}で囲むと、配列の要素が表示される
+    //単一の要素の場合は、()で囲まれていることになるので要らなかったはず
+    return (
+        <>
+            {
+                [...Array(totalStars)].map((n, i)=>(
+                    <Star key={i} selected={selectedStars > i} />
+                ))
+            }
+            <p>
+                {selectedStars} of {totalStars} stars
+            </p>
+        </>
+    );
+}
+
+export default StarRating;
+```
+- onClickイベントハンドラを設定する
+```js
+const Star = ({selected = false, onSelect = f => f}) =>(
+    <FaStar color={selected ? "red" : "gray"} onClick={onSelect} />
+);
+```
+- 解説
+```
+f => f
+    ・受け取った値をそのまま返すダミー関数
+    ・クリックした際に、onClick関数がundefinedであるとエラーになるので、デフォルト引数を設定している
+    ・直近のブラウザではonClickイベントにundefinedを設定してもエラーにならないっぽい
+```
+
+- Clickイベントを反映したステート
+```js
+import React, {useState} from "react";
+import {FaStar} from "react-icons/fa";
+
+const Star = ({selected = false, onSelect = f => f}) =>(
+    <FaStar color={selected ? "red" : "gray"} onClick={onSelect} />
+);
+
+function StarRating({totalStars = 5}){
+    const [selectedStars, setSelectedStars] = useState(0);
+    return (
+        <>
+            {
+                [...Array(totalStars)].map((n, i)=>(
+                    <Star 
+                    key={i} 
+                    selected={selectedStars > i} 
+                    onSelect={() => setSelectedStars(i + 1)}
+                    />
+                ))
+            }
+            <p>
+                {selectedStars} of {totalStars} stars
+            </p>
+        </>
+    );
+}
+
+export default StarRating;
+```
+- 解説
+```
+const [selectedStars, setSelectedStars] = useState(0);
+    ・2番目の要素は関数。
+    ・この関数を使ってコンポーネント内からステート値を変更可能
+    ・デストラクチャリングでuseStateの戻り値を2つの変数に代入している
+    ・setSelectedStarsを呼び出すことで、コンポーネントは再描画される。つまり、StarRating関数が呼び出され、結果selectedStarsには更新されたステート値が代入される。
+
+★データが変更されると、フックは自身がフックされたコンポーネントを新しいデータで再描画する能力を持つ
+
+例)
+・先頭から2番目のStarコンポーネントをClickする
+・onSelect関数が参照しているiの値は1なので、setSelectedStarsには2がsetされる。
+・StarReatingコンポーネントは再描画され、selectedStarsに2が代入される。
+```
+[hooksのstateが見られる画像](./images/star1.png)
