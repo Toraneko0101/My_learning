@@ -132,6 +132,8 @@ const Star = ({selected = false, onSelect = f => f}) =>(
     <FaStar color={selected ? "red" : "gray"} onClick={onSelect} />
 );
 
+//onselectではclosureとして親のローカル関数iを保持しているので、
+//clickすると適切な値でsetSelectedStarsが呼び出される
 function StarRating({totalStars = 5}){
     const [selectedStars, setSelectedStars] = useState(0);
     return (
@@ -170,3 +172,323 @@ const [selectedStars, setSelectedStars] = useState(0);
 ・StarReatingコンポーネントは再描画され、selectedStarsに2が代入される。
 ```
 [hooksのstateが見られる画像](./images/star1.png)
+
+- 昔のステート管理
+```
+・昔はクラスコンポーネントにステートオブジェクトを追加する必要があった
+・フックと比べて構文は複雑で、コンポーネント間でのコードの再利用も難しかった
+・thisやbindが各所に用いられている
+```
+
+## 6.1.2 再利用性を考慮したリファクタリング
+```
+ユーザはstyleを変更したいと思うかも
+    ・ReactコンポーネントにCSSを適用するにはstyleプロパティ経由で行う。
+    ・多くのコンポーネントはプロパティ経由で受け取ったstyle値を、自身が描画する要素に反映させる
+    ・styleプロパティは子要素に渡すようにする
+
+ユーザはイベントハンドラを設定したいと思うかも
+    ・propsプロパティの残りの引数をそのまま<div>要素に渡す
+
+ただし
+    ・propsに<div>がサポートしないプロパティが入っていたり
+    ・不正なプロパティがpropsに含まれている場合
+    ⇒失敗する
+    ⇒その場合は、明示的にpropsがイベントハンドラを抽出する
+
+```
+```js
+import React, {useState} from "react";
+import {FaStar} from "react-icons/fa";
+
+const Star = ({selected = false, onSelect = f => f}) =>(
+    <FaStar color={selected ? "red" : "gray"} onClick={onSelect} />
+);
+
+//i+1なので0をclickすると1になる
+//外側の波括弧はJSXを埋め込むためのもの。内側の必要性を疑ったときは本来、style={color: "yellow"}という風に表記することを思い出す。
+function StarRating({style = {}, totalStars = 5, ...props}){
+    const [selectedStars, setSelectedStars] = useState(0);
+    return (
+        <div style={{padding : "5px", ...style }} {...props}>{/*styleプロパティを受け取って、さらにpaddingを追加している */}
+            {
+                [...Array(totalStars)].map((n, i)=>(
+                    <Star 
+                    key={i} 
+                    selected={selectedStars > i} 
+                    onSelect={() => setSelectedStars(i + 1)}
+                    />
+                ))
+            }
+            <p>
+                {selectedStars} of {totalStars} stars
+            </p>
+        </div>
+    );
+}
+
+export default StarRating;
+```
+# 6.2 アプリケーション全体のステート管理
+```
+・複数のコンポーネントがステートを持つと、機能追加やデバッグが難しくなる。
+・アプリケーションのステートは1か所で管理した方が効率的
+・分かりやすいのは最上位のルートコンポーネントですべてのステートを管理し、子供にプロパティ値として渡すことで、全体に反映させるやり方
+・以下に、本章で使用するデータを示す
+```
+- data
+```json
+[
+    {
+        "id": "0175d1f0-a8c6-41bf-8d02-df5734d829a4",
+        "title": "ocean at dusk",
+        "color": "#00c4e2",
+        "rating": 5
+    },
+    {
+        "id": "83c7ba2f-7392-4d7d-9e23-35adbe186046",
+        "title": "lawn",
+        "color": "#26ac56",
+        "rating": 3
+    },
+    {
+        "id": "a11e3995-b0bd-4d58-8c48-5e49ae7f7f23",
+        "title": "bright red",
+        "color": "#ff0000",
+        "rating": 0
+    }
+]
+```
+## 6.2.1 ステート値をコンポーネントツリーの上から下に伝える
+```
+・ルートコンポーネントAppでステートを保持する
+・ステート値はjsonから読みだして、配下のcomponentに渡す
+・配下ではステートを保持しない
+・ColorDataがステートの初期値になる。
+・これをColorListにプロパティ値として渡す
+```
+- App.js
+```js
+import React, {useState} from "react";
+import colorData from "./color_data.json";
+import ColorList from "./ColorList.js";
+
+export default function App(){
+    const [colors] = useState(colorData);
+    return <ColorList colors={colors} />;
+}
+```
+- ColorList.js
+```js
+import React from "react";
+import Color from "./Color";
+
+/**
+ * 1.Appのcomponentから渡されたプロパティからcolorsの配列を取り出す
+ * 2.colorsが長さ0ならmessage出力
+ * 3.それ以外はColorコンポーネントの配列に変換して、配列なので{}でくくってJSXとしてreturnする
+ */
+export default function ColorList({colors = []}){
+    if(!colors.length) return <div>No Colors Listed.</div>
+    return (
+        <div>
+            {
+                colors.map(color => <Color key={color.id} {...color} />)
+            }
+        </div>
+    );
+}
+```
+- Color.js
+```js
+import StarRating from "./StarRating"
+/**
+ * 3つのpropertyを受け取る
+ * ratingについてはStarRatingのpropertyとして渡す
+ */
+
+export default function Color({title, color, rating}){
+    return (
+        <section>
+            <h1>{title}</h1>
+            <div style={{height: 50, backgroundColor: color}} />
+            <StarRating selectedStars={rating} />
+        </section>
+    )
+}
+```
+- StarRating.js
+```js
+/**
+ * rootで持っているので、starRatingはstateを保持する必要がなくなった
+ * そのため同じプロパティ値で呼び出されたら必ず同じ描画結果となる⇒純粋関数
+ * 自身でstateを管理しながら、親のstateをpropertyとして受け取ることも可能
+ */
+import {FaStar} from "react-icons/fa";
+
+const Star = ({selected = false, onSelect = f => f}) =>(
+    <FaStar color={selected ? "red" : "gray"} onClick={onSelect} />
+);
+
+export default function StarRating({totalStars = 5, selectedStars = 0}){
+    return (
+        <>
+            {
+                [...Array(totalStars)].map((n, i)=>(
+                    <Star 
+                    key={i} 
+                    selected={selectedStars > i} 
+                    />
+                ))
+            }
+            <p>
+                {selectedStars} of {totalStars} stars
+            </p>
+        </>
+    );
+}
+```
+
+## 6.2.2 ユーザの操作をコンポーネントツリーの下から上に伝える
+```
+・変更や削除などのユーザの操作は末端のコンポーネントに対して行われる
+・それをrootに伝える必要がある。rootコンポーネントに対してstateが保持されているので
+・以下では色タイトルの隣に削除ボタンを配置して、特定の色をstateから削除できるようにする
+```
+
+- StarRating.js
+```js
+/**
+ * rootで持っているので、starRatingはstateを保持する必要がなくなった
+ * コンポーネントを実装したときにiを持つ
+ */
+import {FaStar} from "react-icons/fa";
+
+const Star = ({selected = false, onSelect = f => f}) =>(
+    <FaStar color={selected ? "red" : "gray"} onClick={onSelect} />
+);
+
+export default function StarRating({
+    totalStars = 5, 
+    selectedStars = 0,
+    onRate = f => f //色の評価用
+}){
+    return (
+        <>
+            {
+                [...Array(totalStars)].map((n, i)=>(
+                    <Star 
+                    key={i} 
+                    selected={selectedStars > i}
+                    onSelect={()=> onRate(i+1)}
+                    />
+                ))
+            }
+            <p>
+                {selectedStars} of {totalStars} stars
+            </p>
+        </>
+    );
+}
+```
+- Color.js
+```js
+import {FaTrash} from "react-icons/fa"; //ゴミ箱のアイコン
+import StarRating from "./StarRating"
+/**
+ * 1. 3つのpropertyを受け取る
+ * 2. ratingについてはStarRatingのpropertyとして渡す
+ * 3. buttonのclick時に、onRemove関数が呼び出される。idプロパティをclosureで参照
+ * colorコンポーネントは、親にイベントを通知する
+ * onRemoveは、引数として親から受け取っているので責任は、親に転嫁できる
+ */
+
+export default function Color({
+    id,
+    title, 
+    color, 
+    rating, 
+    onRemove = f => f,
+    onRate = f => f
+}){
+    return (
+        <section>
+            <h1>{title}</h1>
+            <button onClick={()=> onRemove(id)}>
+                <FaTrash />
+            </button>
+            <div style={{height: 50, backgroundColor: color}} />
+            <StarRating 
+                selectedStars={rating}
+                onRate={(rating) => onRate(id, rating)} 
+            />
+        </section>
+    )
+}
+```
+- ColorList.js
+```js
+import React from "react";
+import Color from "./Color";
+
+/**
+ * 1.Appのcomponentから渡されたプロパティからcolorsの配列を取り出す
+ * 2.colorsが長さ0ならmessage出力
+ * 3.それ以外はColorコンポーネントの配列に変換して、配列なので{}でくくってJSXとしてreturnする
+ * onRemoveColorの実装は親
+ */
+export default function ColorList({
+    colors = [], 
+    onRemoveColor = f => f,
+    onRateColor = f => f
+}){
+    if(!colors.length) return <div>No Colors Listed.</div>
+    return (
+        <div>
+            {
+                colors.map(color => 
+                <Color 
+                    key={color.id} 
+                    {...color} 
+                    onRemove={onRemoveColor}
+                    onRate={onRateColor} 
+                />)
+            }
+        </div>
+    );
+}
+```
+- App.js
+```js
+import React, {useState} from "react";
+import colorData from "./color_data.json";
+import ColorList from "./ColorList.js";
+
+/**
+ * onRemoveColor
+ *  idを引数にとり、対応する色のデータをstateの配列colorsから除外して新しい配列を生成。その後、setColorsでcomponentを再描画 
+ * onRateColor
+ *  id,ratingを引数にとり、idに対応するratingを新しい値で更新。その後、再描画
+ */
+export default function App(){
+    const [colors, setColors] = useState(colorData);
+    return (
+      <ColorList 
+      colors={colors}
+      onRemoveColor = {id => {
+        const newColors = colors.filter(color => color.id !== id);
+        setColors(newColors);
+      }} 
+      onRateColor={(id, rating) =>{
+        const newColors = colors.map(color=>{
+          return color.id === id ? {...color, rating} : color
+        });
+        setColors(newColors);
+      }}
+      />
+    );
+}
+
+```
+
+# 6.3 フォーム入力を処理するアプリケーション

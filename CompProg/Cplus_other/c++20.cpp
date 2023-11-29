@@ -106,7 +106,13 @@ int main(){
     for(auto i: views::filter(a2, [](int i){return i % 2 == 1;})){
         cout << i << "\n";
     }
+    //transform:全ての要素に関数を適用して返す
+    for(auto i: views::transform(a2, [](int i){return i * 2;})){
+        cout << i << "\n";
+    }
 
-
-
+    //join:要素の連結を返す
+    for(auto i: views::join(vector{a2,a2})){
+        cout << i << "\n";
+    }
 }
