@@ -541,3 +541,106 @@ export default function AddColorForm({onNewColor = f => f}){
 ```
 ・ユーザの入力値はReactで管理されるので、DOMノードに対する直接アクセスは不要。refも不要
 ```
+
+```js
+import React, {useRef} from "react";
+
+export default function AddColorForm({onNewColor = f => f}){
+    const [title, setTitle] = useState("");
+    const [color, setColor] = useState("#000000");
+
+    const submit = e => {
+        e.preventDefault();
+        onNewColor(title, color);
+        setTitle("");
+        setColor("#000000");
+    };
+    //ユーザが文字をタイプするたびに、stateを更新する仕組みが必要
+    //変わるたびに、valueの値をsetしている
+    /**
+     * カラーの方は、ユーザがマウスドラッグするたびに再描画される
+     * しかし、Reactは重複した描画要求を調停する仕組みを持っている
+     * ただ、関数自体は呼び出されるので描画関数内で重い処理を実行するのは避けるべき
+     */
+    return(
+        <form onSubmit={submit}>
+            <input
+                value={title}
+                onChange={event => setTitle(event.target.value)}
+                type="text"
+                placeholder="color title..."
+                required
+            />
+            <input
+                value={color}
+                onChange={event => setColor(event.target.value)}
+                type="color"
+                required
+            />
+            <button>ADD</button>
+        </form>
+    );
+}
+```
+
+## 6.3.3　カスタムフック
+```
+・巨大なフォームを実装する場合、input要素を大量に書くことになる
+・重複したコードを切り出して抽象化したい。孫田ときに役立つのがカスタムフック
+```
+- hooks.js
+```js
+import {useState} from "react";
+
+/**
+ * stateの初期値を受け取り、配列を戻り値として返す
+ * 1つ目はvalueとonChangeのプロパティ名：値を含むオブジェクト
+ * 2つ目はstateを初期値でリセットするための関数
+ */
+export const useInput = initialValue =>{
+    const [value, setValue] = useState(initialValue);
+    return [
+        {value, onChange: e => setValue(e.target.value)},
+        () => setValue(initialValue)
+    ];
+};
+```
+
+- AddColorForm.js
+```js
+import React from "react";
+import {useInput} from "./hooks";
+
+export default function AddColorForm({onNewColor = f => f}){
+    const [titleProps, resetTitle] = useInput("");
+    const [colorProps, resetColor] = useInput("#000000");
+
+    const submit = e => {
+        e.preventDefault();
+        onNewColor(titleProps.value, colorProps.value);
+        resetTitle();
+        resetColor();
+    };
+
+    /**
+     * {...titleProps}には、useInputから返ってきたvalueとset用の関数が入っていた配列があり、デストラクチャリングで取り出している
+     * resetTitleには、() => setValue(initialValue)が入っている最初にuseInputを""で初期化しているので、() => setValue("")ということになる
+     */
+    return(
+        <form onSubmit={submit}>
+            <input 
+                {...titleProps}
+                type="text"
+                placeholder="color title..."
+                required
+            />
+            <input
+                {...colorProps}
+                type="color"
+                required 
+            />
+            <button>ADD</button>
+        </form>
+    );
+}
+```
