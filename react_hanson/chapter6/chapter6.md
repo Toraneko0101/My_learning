@@ -541,7 +541,7 @@ export default function AddColorForm({onNewColor = f => f}){
 ```
 ・ユーザの入力値はReactで管理されるので、DOMノードに対する直接アクセスは不要。refも不要
 ```
-
+- AddColorForm.js
 ```js
 import React, {useRef} from "react";
 
@@ -617,6 +617,7 @@ export default function AddColorForm({onNewColor = f => f}){
 
     const submit = e => {
         e.preventDefault();
+        //引数はこっちで書くけど、関数は親で定義
         onNewColor(titleProps.value, colorProps.value);
         resetTitle();
         resetColor();
@@ -644,3 +645,63 @@ export default function AddColorForm({onNewColor = f => f}){
     );
 }
 ```
+
+## 6.3.4 入力をステート値に反映させる
+```
+・更新した際は、関数プロパティ経由で親に通知する
+・親で関数を定義し、子の方でその関数を使って引数を入れる感じ
+```
+- App.js
+```js
+import React, {useState} from "react";
+import colorData from "./color_data.json";
+import ColorList from "./ColorList.js";
+import AddColorForm from "./AddColorForm.js";
+import {v4} from "uuid"; //ランダムなuuid
+
+
+/**
+ * onRemoveColor
+ *  idを引数にとり、対応する色のデータをstateの配列colorsから除外する。その後、setColorsでcomponentを再描画 
+ * onRateColor
+ *  id,ratingを引数にとり、idに対応するratingを新しい値で更新。その後、再描画
+ * setColors
+ *  新しく配列をsetしている
+ */
+export default function App(){
+    const [colors, setColors] = useState(colorData);
+    return (
+      <>
+        <AddColorForm
+          onNewColor={(title, color)=>{
+            const newColors = [
+              ...colors,
+              {
+                id : v4(),
+                rating: 0,
+                title,
+                color
+              }
+            ];
+            setColors(newColors);
+          }} 
+        />
+        <ColorList 
+          colors={colors}
+          onRemoveColor = {id => {
+            const newColors = colors.filter(color => color.id !== id);
+            setColors(newColors);
+          }} 
+          onRateColor={(id, rating) =>{
+            const newColors = colors.map(color=>{
+              return color.id === id ? {...color, rating} : color
+            });
+            setColors(newColors);
+          }}
+        />
+      </>
+    );
+}
+
+```
+
