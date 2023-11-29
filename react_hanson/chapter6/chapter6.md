@@ -492,3 +492,52 @@ export default function App(){
 ```
 
 # 6.3 フォーム入力を処理するアプリケーション
+```
+・色を追加するUIを実装する
+・通例、form要素はinputやbutton等の子要素を持つ
+```
+## 6.3.1 refを使ったデータアクセス
+```
+ref:
+    ・コンポーネントの描画結果であるDOMノードへの参照を保持する
+    ・useRefフックを関数コンポーネント内で呼び出すことで使える
+    ・今回はこれを用いてフォームを実装する
+
+```
+
+- 制御されていないコンポーネント
+```js
+//DOMに直接アクセスし、取得や変更を行っている(React以外のライブラリとデータをやり取りするとき以外はやめた方がいい)
+import React, {useRef} from "react";
+
+export default function AddColorForm({onNewColor = f => f}){
+    //title入力用の<input>要素を参照するためのref_object
+    //refに設定することで、ref_obj.currentでDOM要素に直接アクセス可能
+    
+    const txtTitle = useRef();
+    //色の選択用の<input>要素を参照するためのref_object
+    const hexColor = useRef();
+    //ADDボタンがクリックされたタイミングでDOM要素にアクセスし、入力値を読みだす
+    const submit = (e) => {
+        e.preventDefault(); //ボタンクリック時のPOST送信:default動作を抑止
+        const title = txtTitle.current.value; //ユーザの入力値を取得
+        const color = hexColor.current.value;
+        onNewColor(title, color); //親に通知
+        txtTitle.current.value = "";
+        hexColor.current.value = "";
+    };
+
+    return (
+        <form onSubmit = {submit}>
+            <input ref={texTitle} type="text" placeholder="color title..." required />
+            <input ref={hexColor} type="color" required />
+            <button>ADD</button>
+        </form>
+    );
+}
+```
+
+## 6.3.2 制御されたコンポーネント
+```
+・ユーザの入力値はReactで管理されるので、DOMノードに対する直接アクセスは不要。refも不要
+```
