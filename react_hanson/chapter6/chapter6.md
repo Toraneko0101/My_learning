@@ -705,3 +705,432 @@ export default function App(){
 
 ```
 
+# 6.4 Reactコンテキスト
+```
+・ルートコンポーネントでのみステートを保持する方法は、アプリケーションの規模が大きくなり、ネストが深くなると非現実的になった
+・ステートを1か所で管理するには、ルートと末端のcomponentでプロパティをすべて設定しなければいけないため
+・中間のコンポーネントはデータの受け渡しのために、使いもしないデータを上位や下位に流す必要があるので、コードは複雑になりスケールも大変になる。
+・中継地を利用しない方法がコンテキスト
+```
+- contextの概要
+```
+・これを利用するには、まずコンテキストプロバイダーにデータを渡す
+・これは特別なcomponentで、コンポーネントツリーの全体もしくは一部を、このコンポーネントで囲む
+・コンテキストコンシューマーはコンテキストからデータを読み出すのにつかわれる
+・コンテキストを利用することで、アプリケーションのステートは1か所で管理され、コンポーネントを経由する必要もなくなる
+```
+- index.js
+```js
+//コンテキストプロバイダーを追加する
+import React, {createContext} from 'react';
+import {render} from 'react-dom';
+import App from "./App";
+import colors from "./color_data.json"
+
+/**
+ * 
+ * ColorContext
+ *  exportされている。そのためcolorsのデータを参照したい場合は、AppコンポーネントからColorContext.Consumerをimportする必要がある
+ * ColorContext.Provider
+ *  アプリケーションのデータを渡し、ルートのAppを囲む
+ *  渡されたアプリケーションのデータcolorsはApp配下のすべてのコンポーネントから参照可能
+ * ColorContext.Consumer
+ * 
+ * 一部のcomponent二のみデータを公開したい場合は、コンポーネントツリーの一部をProviderで囲む
+ * アプリケーション内で複数のContext.Providerを使うことも可能
+ */
+export const ColorContext = createContext();
+
+render(
+  <ColorContext.Provider value={{ colors }} >
+    <App />
+  </ColorContext.Provider>,
+  document.getElementById("root")
+);
+
+
+
+```
+
+- App.js
+```js
+import React from "react";
+import ColorList from "./ColorList.js";
+import AddColorForm from "./AddColorForm";
+
+export default function App(){
+  return(
+    <>
+      <AddColorForm />
+      <ColorList />
+    </>
+  ); 
+}
+```
+
+## 6.4.2 useContextフックからデータを取得する
+```
+useContext
+    ・内部でコンテキストのConsumerコンポーネントを使用してデータを取得している
+    ・コンテキストから直接データにアクセスしよう
+```
+
+- ColorList.js
+```js
+import React, { useContext } from "react";
+import Color from "./Color";
+import {ColorContext} from "./";
+
+export default function ColorList(){
+    const {colors} = useContext(ColorContext);
+    if(!colors.length) return <div>No Colors Listed. (Add a Color)</div>
+    return (
+        <div>
+            {
+                colors.map(color => <Color key={color.id} {...color} />)
+            }
+        </div>
+    );
+}
+```
+
+- useContext以前
+```js
+/**
+ * フックが登場する前はConsumerコンポーネントにアクセスする必要があり
+ * Consumer内でレンダープロップというパターンを用いてコンテキストにアクセスしていた
+*/
+export default function ColorList(){
+    return(
+        <ColorContext.Consumer>
+            {context => {
+                if(!context.colors.length)
+                return <div>No Colors Listed. (Add a Color)</div>;
+                    return (
+                        <div className="color-list">
+                        {
+                            context.colors.map(color =>{
+                                <Color key={color.id} {...color} />
+                            })
+                        }
+                        </div>
+                    );
+            }}
+        </ColorContext.Consumer>
+    )
+}
+```
+
+## 6.4.3 コンテキストとステートの併用
+```
+・コンテキストプロバイダーを使うとデータの公開が可能
+・データの変更には更に親のコンポーネントの助けがいる
+・親でステートを保持して、その値をProviderコンポーネントに設定
+・ステートが更新されると親が再描画され、結果的にProvider配下のコンポーネントツリーが再描画される
+・ステートを保持するコンポーネントでコンテキストプロバイダーを描画する場合、そのコンポーネントをカスタムプロバイダーとよぶ
+```
+- ColorProvider.js(カスタムプロバイダー)
+```js
+import React, {createContext, useState} from "react";
+import colorData from "./color-data.json";
+
+export const ColorContext = createContext();
+
+/**
+ * children配下のcomponentはcolorsの参照が可能
+ * setColorsもコンテキストに設定しているので、ステート値の変更も可能
+ * setColorsを呼び出して変更すると、ColorProviderコンポーネントが再描画され、新しいcolorsの値でその配下も含めて再描画される(useStateがフックされているのはColorProviderなので)
+ */
+export default function ColorProvider({children}){
+    const [colors, setColors] = useState(colorData);
+    //valueにはobjを渡す
+    return(
+        <ColorContext.Provider value={{colors, setColors}}>
+            {children}
+        </ColorContext.Provider>
+    );
+}
+```
+
+- 改良
+```
+・setColors関数をそのままコンテキストで公開すると、どんな操作も可能になる。
+・そのため特定の関数のみをコンテキストに設定するようにする
+```
+- ColorProvider.js
+```js
+import React, {createContext, useState} from "react";
+import colorData from "./color-data.json";
+
+export const ColorContext = createContext();
+
+/**
+ * children配下のcomponentはcolorsの参照が可能
+ * setColorsの代わりに特定の関数のみを引き渡す
+ * 今回の場合、3つの関数はコンテキスト経由でどこからでも参照可能
+ */
+export default function ColorProvider({children}){
+    const [colors, setColors] = useState(colorData);
+    //valueにはobjを渡す
+    const addColor = (title, color) =>
+        setColors([
+            ...colors,
+            {
+                id: v4(),
+                rating: 0,
+                title,
+                color
+            }
+        ]);
+
+    const rateColor = (id, rating) =>
+        setColors(
+            colors.map(color => (color.id === id ? {...color, rating} : color))
+        );
+    
+    const removeColor = id => setColors(colors.filter(color => color.id !== id));
+
+    return(
+        <ColorContext.Provider value={{colors, addColor, removeColor, rateColor}}>
+            {children}
+        </ColorContext.Provider>
+    );
+}
+```
+## 6.4.4 コンテキストとカスタムフックの併用
+```
+・カスタムフックを導入すればコンテキストをコンシューマに公開せず、データの共有が可能
+・コンテキストの操作をカスタムフックで隠蔽することで、コンポーネントの開発者にコンテキストの知識がない場合でもデータの共有が可能
+・具体的にはColorContextの代わりに、カスタムフックをimportする
+```
+- ColorProvider.jsのhead(6)
+```js
+import React, {createContext, useState, useContext} from "react";
+import colorData from "./color-data.json";
+import {v4} from "uuid";
+
+const ColorContext = createContext();
+export const useColors = () => useContext(ColorContext);
+```
+- 説明
+```
+・コンテキストにはカスタムフック経由でアクセスされる
+・useContextはカスタムフック内で呼び出される
+・そのためColorContextを別途exportする必要はない
+・つまり、ColorProvider.jsはColorProviderとuseColorsフックをexportする
+
+・useContexの戻り値は、指定したcontextの現在の値となる
+・この値は、ツリー内でuseContextを呼び出したcomponentの上位かつ最も近いContext.Providerに渡されたvalueとして決定される。
+・今回は、valueにオブジェクトを設定し、そこからデストラクチャリングで必要な値（関数）だけ取り出している
+```
+
+- 最終結果
+- ColorProvider.js
+```js
+import React, {createContext, useState, useContext} from "react";
+import colorData from "./color_data.json";
+import {v4} from "uuid";
+
+const ColorContext = createContext();
+export const useColors = () => useContext(ColorContext);
+
+/**
+ * children配下のcomponentはcolorsの参照が可能
+ * setColorsの代わりに特定の関数のみを引き渡す
+ * providerコンポーネントはvalueプロパティを受け取り、それが子孫であるconsumerコンポーネントに渡される
+ */
+export default function ColorProvider({children}){
+    const [colors, setColors] = useState(colorData);
+    //以下,setColorsで値を変える用の関数3種
+    const addColor = (title, color) =>
+        setColors([
+            ...colors,
+            {
+                id: v4(),
+                rating: 0,
+                title,
+                color
+            }
+        ]);
+
+    const rateColor = (id, rating) =>
+        setColors(
+            colors.map(color => (color.id === id ? {...color, rating} : color))
+        );
+    
+    const removeColor = id => setColors(colors.filter(color => color.id !== id));
+
+    return(
+        <ColorContext.Provider value={{colors, addColor, removeColor, rateColor}}>
+            {children}
+        </ColorContext.Provider>
+    );
+}
+```
+- index.js
+```js
+//コンテキストプロバイダーを追加する
+import React from 'react';
+import ColorProvider from "./ColorProvider";
+import {render} from 'react-dom';
+import App from "./App";
+
+//colorcontext.providerはcolorprovider.jsの方でreturnされる
+render(
+  <ColorProvider>
+    <App />
+  </ColorProvider>,
+  document.getElementById("root")
+);
+```
+- App.js
+```js
+import React from "react";
+import ColorList from "./ColorList.js";
+import AddColorForm from "./AddColorForm";
+
+export default function App(){
+  return(
+    <>
+      <AddColorForm />
+      <ColorList />
+    </>
+  ); 
+}
+```
+- ColorList.js
+```js
+import React from "react";
+import Color from "./Color";
+import {useColors} from "./ColorProvider";
+
+export default function ColorList(){
+    const {colors} = useColors(); //useColors = () => useContext(ColorContext);
+    if(!colors.length) return <div>No Colors Listed. (Add a Color)</div>
+    return (
+        <div>
+            {
+                colors.map(color => <Color key={color.id} {...color} />)
+            }
+        </div>
+    );
+}
+```
+- Color.js
+```js
+import {FaTrash} from "react-icons/fa"; //ゴミ箱のアイコン
+import React from "react";
+import StarRating from "./StarRating"
+import {useColors} from "./ColorProvider";
+
+/**
+ * useColors()からカスタムフック経由で関数を取得している。
+ */
+export default function Color({id, title, color, rating }){
+    const {rateColor, removeColor} = useColors();
+    return (
+        <section>
+            <h1>{title}</h1>
+            <button onClick={()=> removeColor(id)}><FaTrash /></button>
+            <div style={{height: 50, backgroundColor: color}} />
+            <StarRating 
+                selectedStars={rating}
+                onRate={(rating) => rateColor(id, rating)} 
+            />
+        </section>
+    );
+}
+```
+- StarRating.js
+```js
+/**
+ * rootで持っているので、starRatingはstateを保持する必要がなくなった
+ * コンポーネントを実装したときにiを持つ
+ */
+import {FaStar} from "react-icons/fa";
+import {useColors} from "./ColorProvider";
+
+const Star = ({selected = false, onSelect = f => f}) =>(
+    <FaStar color={selected ? "red" : "gray"} onClick={onSelect} />
+);
+
+export default function StarRating({
+    totalStars = 5, 
+    selectedStars = 0,
+    onRate = f => f //色の評価用
+}){
+    const {rateColor} = useColors();
+    return (
+        <>
+            {
+                [...Array(totalStars)].map((n, i)=>(
+                    <Star 
+                    key={i} 
+                    selected={selectedStars > i}
+                    onSelect={()=> rateColor(i+1)}
+                    />
+                ))
+            }
+            <p>
+                {selectedStars} of {totalStars} stars
+            </p>
+        </>
+    );
+}
+```
+- AddColorForm.js
+```js
+import React from "react";
+import {useInput} from "./hooks";
+import {useColors} from "./ColorProvider";
+export default function AddColorForm(){
+    const [titleProps, resetTitle] = useInput("");
+    const [colorProps, resetColor] = useInput("#000000");
+    const { addColor } = useColors();
+
+    const submit = e => {
+        e.preventDefault();
+        addColor(titleProps.value, colorProps.value);
+        resetTitle();
+        resetColor();
+    };
+
+    /**
+     * {...titleProps}には、useInputから返ってきたvalueとset用の関数が入っていた配列があり、デストラクチャリングで取り出している
+     * resetTitleには、() => setValue(initialValue)が入っている最初にuseInputを""で初期化しているので、() => setValue("")ということになる
+     */
+    return(
+        <form onSubmit={submit}>
+            <input 
+                {...titleProps}
+                type="text"
+                placeholder="color title..."
+                required
+            />
+            <input
+                {...colorProps}
+                type="color"
+                required 
+            />
+            <button>ADD</button>
+        </form>
+    );
+}
+```
+- hook.js
+```js
+import {useState} from "react";
+
+/**
+ * stateの初期値を受け取り、配列を戻り値として返す
+ * 1つ目はvalueとonChangeのプロパティ名：値を含むオブジェクト
+ * 2つ目はstateを初期値でリセットするための関数
+ */
+export const useInput = initialValue =>{
+    const [value, setValue] = useState(initialValue);
+    return [
+        {value, onChange: e => setValue(e.target.value)},
+        () => setValue(initialValue)
+    ];
+};
+```
