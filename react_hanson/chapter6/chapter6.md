@@ -976,6 +976,9 @@ import {render} from 'react-dom';
 import App from "./App";
 
 //colorcontext.providerはcolorprovider.jsの方でreturnされる
+//reactではchildrenは特殊なpropsであり、親タグの間に書かれたコード全体を意味する
+//つまり今回の場合、ColorProviderのchildrenはAppである
+//本コードではAppはその子要素として他のコンポーネントを持つので、ColorProviderは全てのコンポーネントを囲んでいることになる。
 render(
   <ColorProvider>
     <App />
