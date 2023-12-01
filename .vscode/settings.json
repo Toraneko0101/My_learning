@@ -27,6 +27,7 @@
         "stacktrace": "cpp",
         "cstdlib": "cpp",
         "tuple": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "functional": "cpp"
     }
 }
