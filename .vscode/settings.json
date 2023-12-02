@@ -28,6 +28,7 @@
         "cstdlib": "cpp",
         "tuple": "cpp",
         "*.tcc": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "numeric": "cpp"
     }
 }

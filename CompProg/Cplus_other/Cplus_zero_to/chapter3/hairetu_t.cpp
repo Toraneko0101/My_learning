@@ -11,6 +11,7 @@ using namespace std;
  * void PrintArray1(const int x[5])
  * void PrintArray2(const int *x)
  * 要素数の情報は欠落する -> sizeでよさそう
+ * 要素数の情報が欠落するのが配列がCから受け継いだものだから
 */
 
 //vectorの場合：要素数の情報取得は容易
