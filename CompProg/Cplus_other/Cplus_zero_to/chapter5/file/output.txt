@@ -1,0 +1,26 @@
+a : apple
+b : banana
+c : calamansi
+d : dragon fruits
+e : elephant apple
+f : feijoa
+g : grape
+H : Hassaku
+i : icacina
+j : jujuba
+k : kiwi
+l : lemon
+m : melon
+n : nectarine
+o : orange
+p : peach
+q : quince
+r : raspberry
+s : strawberry
+t : tangor
+u : ugli fruit
+v : valencia orange
+w : watermelon
+x : ximenia
+y : yuzu
+z : zabergau reinette
