@@ -31,7 +31,12 @@ public:
     //基底のコンストラクタを明示的に呼び出す
     //派生クラスの初期化リストとして呼び出す場合は、
     //基底クラス::コンストラクタはコンストラクタとして省略可能
-    Square(int size) : Rectangle(size, size){}
+    Square(int size) : 
+        //Rectangleのコンストラクタの定義が実行される
+        Rectangle(size, size),
+        another_member(size * 2)
+    {}
+    int another_member;
 };
 
 int main(){
