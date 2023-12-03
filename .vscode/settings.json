@@ -29,6 +29,8 @@
         "tuple": "cpp",
         "*.tcc": "cpp",
         "functional": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "bitset": "cpp",
+        "utility": "cpp"
     }
 }
