@@ -20,7 +20,7 @@ int main(){
     var = 12;
     std::visit(Print{}, var);
 
-    //全ての候補型で共通の操作を粉う場合
+    //全ての候補型で共通の操作を行う場合
     std::variant<int, double, string> v;
     v = "Neko";
     std::visit([](const auto& x){
