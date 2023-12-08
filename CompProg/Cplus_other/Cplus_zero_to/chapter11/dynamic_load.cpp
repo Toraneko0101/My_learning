@@ -36,6 +36,16 @@ public:
      * ⇒dlsymが返すvoidポインタを関数ポインタ型に変換するためにreinterpret_castが用いられている
      * 
      * ⇒関数ポインタはmainの方でauto型として受け取る
+     * 
+     * 名前マングリングについて
+     * objectファイルでは変数や関数を名前だけで識別する必要がある
+     * C言語は変数や関数を名前だけで識別している
+     * C++はclassや名前空間,template,関数オーバーロードのため識別に必要な情報を名前に含めて一意な名前を使用している
+     * ⇒名前マングリング
+     * ⇒この方法はコンパイラ依存で、無効化するにはextern "C"を使う
+     * ⇒これはC言語でリンク可能にし、関数名をそのままシンボルにする指定だが、代わりに名前の重複が禁止される。
+     * ⇒extern "C"については#includeするときに、囲む手もある
+     * ⇒もしくは#ifdef __cplusplusを囲み、C++の関数である場合に名前マングリングを無効化するとか
     */
     DynamicLibraryWrapper(const char* libraryName):
         handle(dlopen(libraryName, RTLD_LAZY)){
@@ -70,7 +80,13 @@ private:
 int main(){
     try{
         //標準入力によって、ロードする形にする?
-
+        string input_str;
+        cin >> input_str;
+        if(input_str == "abc"){
+            DynamicLibraryWrapper mul1("./mul_test.so");
+            auto MulLibrary = mul1.getFunction<int(int, int)>("Mul");
+            cout << MulLibrary(6,4) << endl;
+        }
 
         //init library load
         DynamicLibraryWrapper lib1("./add_test.so");
