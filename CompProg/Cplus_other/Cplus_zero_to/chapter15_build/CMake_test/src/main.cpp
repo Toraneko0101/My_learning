@@ -22,4 +22,34 @@ int main(){
  * ⇒CMakeLists.txtを変更することで、
  * 異なるプラットフォームやビルドツールによるビルドが可能になる
  * ⇒ついでに、.gitignoreにbuildを指定した
+ * 
+ * buildディレクトリを作るのは
+ * ソースコードとビルド結果を分離するため
+ * ⇒アウトオブソースビルド
+ * ⇒何もしないと現在のディレクトリのサブディレクトリにビルド結果が出力されるので
+ * ⇒cmake ..のサブディレクトリはbuildディレクトリ
+*/
+
+// $ tree -L 2
+// .
+// ├── CMakeLists.txt
+// ├── build
+// │   ├── CMakeCache.txt
+// │   ├── CMakeFiles
+// │   ├── Makefile
+// │   ├── cmake_install.cmake
+// │   └── my_executable
+// └── src
+//     └── main.cpp
+
+/**
+ * 3.13以上であれば3番以下の手順を、次のように可能
+ * //ソース(プロジェクトの中身)とビルドを指定
+ * //該当のディレクトリがなければ作成してくれる(build)
+ * 3. cmake -S . -B build
+ * 4. cmake --build build
+ * ⇒makeがMakefileがあるディレクトリで実行されることを前提としているのに対し
+ * ⇒cmake --build buildは可能。
+ * ⇒現在のディレクトリがbuild/なら
+ * =>cmake --build .でいけるはず
 */
