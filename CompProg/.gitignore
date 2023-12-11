@@ -2,3 +2,4 @@
 *.out
 *.ipynb
 build
+*.gch
