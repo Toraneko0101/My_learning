@@ -20,9 +20,9 @@ int main(){
     cout << n3 << endl;
     string str_dec = "2001, A Space Odyssey";
     string::size_type sz; //stringの要素数とidxを示す
-    int i_dec = std::stoi (str_dec,&sz);
+    int i_dec = std::stoi (str_dec,&sz);//整数に直して残りを返す
     cout << i_dec << "[" << str_dec.substr(sz) << "]\n";
 
-    
+
 
 }
