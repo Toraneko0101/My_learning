@@ -70,4 +70,8 @@ $ g++ -std=c++20 -Wall --pedantic-errors -include all.h -o sample sample.cpp
 real    0m0.486s
 user    0m0.390s
 sys     0m0.074s
+
+3. 簡単のため上の階層に保存するので以下の様にする
+$ time g++ -std=c++20 -Wall --pedantic-errors -include 
+../all.h -o sample sample.cpp
 ```
