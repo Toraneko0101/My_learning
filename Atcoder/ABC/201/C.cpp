@@ -35,16 +35,18 @@ int main(){
         //0-padding
         while(size(str_num) < 4) str_num = "0" + str_num;
         
+        //oであれば必ず存在
         bool flag = true;
         for(auto o: o_set){
             auto it_o = std::ranges::find(str_num, (char)(o + '0'));
             if(it_o == str_num.end()) flag = false;
         }
+        //xであれば存在してはならない
         for(auto x: x_set){
             auto it_x = std::ranges::find(str_num, (char)(x + '0'));
             if(it_x != str_num.end()) flag = false;
         }
-
+        //条件に合う組
         if(flag) ans_cnt ++;
 
     }
