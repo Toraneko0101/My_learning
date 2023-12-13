@@ -1,10 +1,12 @@
 int main(){
     double height, weight;
     std::cout << "height(cm) >";
-    std::cin >> height >> "\n";
+    std::cin >> height;
+    std::cout << "\n";
 
     std::cout << "weight(kg) >";
-    std::cin >> weight >> "\n";
+    std::cin >> weight;
+    std::cout << "\n";
 
     double bmi = weight / (height * height);
     std::cout << "BMI=" << bmi << "\n";
