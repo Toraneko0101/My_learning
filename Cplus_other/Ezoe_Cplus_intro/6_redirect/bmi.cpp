@@ -24,3 +24,6 @@ int main(){
 
     std::cout << status(bmi) << "\n";
 }
+// ./convert < bmi.txt | ./bmi
+//cat bmi.txt | ./convert | ./bmi
+//パイプで標準出力を標準入力にする
