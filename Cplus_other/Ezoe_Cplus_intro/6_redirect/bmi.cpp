@@ -1,6 +1,6 @@
 int main(){
     double height, weight;
-    std::cout << "height(cm) >";
+    std::cout << "height(m) >";
     std::cin >> height;
     std::cout << "\n";
 
