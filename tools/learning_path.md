@@ -31,45 +31,53 @@ React関係
 - DeepLearningのロードマップ(2024年末まで)
 ```mermaid
 graph TD
+  classDef todo fill:#dafbe1
+  classDef inProgress fill:orange,fill-opacity:0.3
+高校数学:::todo -->|80h| 大学教養数学:::todo -->|40h| Kaggle:::todo
+高校物理:::inProgress -->|80h| 大学教養数学:::todo
+統計2級:::todo  -->|50h| 現代数理統計学の基礎:::todo
+現代数理統計学の基礎 -->|150h| Kaggle:::todo
+SQLと事前処理の最適化について:::todo -->|100h| Pytorchなどのフレームワーク:::todo
+Pytorchなどのフレームワーク:::todo --> |100h| 強化学習を用いた成果物を作成:::todo
 
-高校数学 -->|80h| 大学教養数学 -->|40h| Kaggle
-高校物理 -->|80h| 大学教養数学
-統計2級  -->|50h| 現代数理統計学の基礎
-現代数理統計学の基礎 -->|150h| Kaggle
-SQLと事前処理の最適化について -->|100h| Pytorchなどのフレームワーク
-Pytorchなどのフレームワーク --> |100h| 強化学習を用いた成果物を作成
-
-ゼロから学ぶDeepLearning2 --> |100h| ゼロから学ぶDeepLearning3
-ゼロから学ぶDeepLearning3 --> |100h| ゼロから学ぶDeepLearning4
-ゼロから学ぶDeepLearning4 --> |100h| RTX4070のPC買う　--> |10h| 強化学習を用いた成果物を作成  --> |100h| 強化学習を用いたコンペに参加
-Kaggle --> |50h| Kaggleで銅メダルを取る--> |?h| 強化学習を用いたコンペに参加
+ゼロから学ぶDeepLearning2:::todo --> |100h| ゼロから学ぶDeepLearning3
+ゼロから学ぶDeepLearning3:::todo --> |100h| ゼロから学ぶDeepLearning4
+ゼロから学ぶDeepLearning4:::todo --> |100h| RTX4070のPC買う:::todo　--> |10h| 強化学習を用いた成果物を作成:::todo  --> |100h| 強化学習を用いたコンペに参加:::todo
+Kaggle:::todo --> |50h| Kaggleで銅メダルを取る:::todo --> |?h| 強化学習を用いたコンペに参加:::todo
 
 
 ```
 - ゲーム && 競プロ関連ロードマップ
 ```mermaid
 graph TD
-
-メトロイドヴァニアをbuild -->|200h| Unity3D
-C#でデスクトップアプリを作る --> |50h| Unity3D
-鉄則と競プロ典型90を解く --> |200h| 緑問題を1時間制限で8割AC
-緑問題を1時間制限で8割AC --> |100h| UnrealEngine入門
-コンパイラ作成のページをやりきる --> |50h| ゲーム以外でC++のアプリ作成
-ゲーム以外でC++のアプリ作成 --> |50h| UnrealEngine入門
+  classDef todo fill:#dafbe1
+  classDef inProgress fill:orange,fill-opacity:0.3
+メトロイドヴァニアをbuild:::inProgress -->|200h| Unity3D:::todo
+C#でデスクトップアプリを作る:::todo --> |50h| Unity3D:::todo
+鉄則と競プロ典型90を解く:::inProgress --> |200h| 緑問題を1時間制限で8割AC:::todo
+緑問題を1時間制限で8割AC:::todo --> |100h| UnrealEngine入門:::todo
+コンパイラ作成のページをやりきる:::todo --> |50h| ゲーム以外でC++のアプリ作成:::todo
+ゲーム以外でC++のアプリ作成:::todo --> |50h| UnrealEngine入門:::todo
 ```
 
 - React関係ロードマップ
 ```mermaid
+
 graph TD
-フックについて理解を深める --> |25h| Typescript入門
-Redux入門 --> |10h| Firebase入門 --> |10h| Typescript入門 --> |20h| UdemyでDiscordクローンの講座やる --> |25h| Amplify+Next.js+Typescriptでアプリ1つ作成
-現在使っているAWSサービスの理解 --> |50h| Amplify+Next.js+Typescriptでアプリ1つ作成
-boto3の勉強　--> |35h| Amplify+Next.js+Typescriptでアプリ1つ作成
+  classDef todo fill:#dafbe1
+  classDef inProgress fill:orange,fill-opacity:0.3
+フックについて理解を深める:::inProgress --> |25h| Typescript入門:::todo
+Redux入門:::todo --> |10h| Firebase入門:::todo --> |10h| Typescript入門:::todo --> |20h| UdemyでDiscordクローンの講座やる:::todo --> |25h| Amplify+Next.js+Typescriptでアプリ1つ作成:::todo
+現在使っているAWSサービスの理解:::todo --> |50h| Amplify+Next.js+Typescriptでアプリ1つ作成:::todo
+boto3の勉強:::todo　--> |35h| Amplify+Next.js+Typescriptでアプリ1つ作成:::todo
 ```
 
 - その他
 ```mermaid
 graph TD
-骨組みを完成させる:小説 --> |100h| 書き始める
-入門書を一冊やりきる:絵 --> |85h| 未定
+  classDef todo fill:#dafbe1
+  classDef inProgress fill:orange,fill-opacity:0.3
+骨組みを完成させる:小説:::todo --> |100h| 書き始める:::todo
+入門書を一冊やりきる:絵:::todo --> |85h| 未定:::todo
 ```
+
