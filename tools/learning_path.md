@@ -54,7 +54,7 @@ graph TD
   classDef inProgress fill:orange,fill-opacity:0.3
 メトロイドヴァニアをbuild:::inProgress -->|200h| Unity3D:::todo
 C#でデスクトップアプリを作る:::todo --> |50h| Unity3D:::todo
-鉄則と競プロ典型90を解く:::inProgress --> |200h| 緑問題を1時間制限で8割AC:::todo
+鉄則と競プロ典型90を解く:::inProgress --> |1/200h| 緑問題を1時間制限で8割AC:::todo
 緑問題を1時間制限で8割AC:::todo --> |100h| UnrealEngine入門:::todo
 コンパイラ作成のページをやりきる:::todo --> |50h| ゲーム以外でC++のアプリ作成:::todo
 ゲーム以外でC++のアプリ作成:::todo --> |50h| UnrealEngine入門:::todo
