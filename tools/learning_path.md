@@ -1,7 +1,7 @@
 - 現在の学習時間(2024/1/1 ~ 2024/12/31)
 ```
 合計
-    0h / 1850h
+    2h / 1850h
 React関係
     0h / 175h
 
@@ -34,7 +34,7 @@ graph TD
   classDef todo fill:#dafbe1
   classDef inProgress fill:orange,fill-opacity:0.3
 高校数学:::todo -->|80h| 大学教養数学:::todo -->|40h| Kaggle:::todo
-高校物理:::inProgress -->|80h| 大学教養数学:::todo
+高校物理:::inProgress -->|2/80h| 大学教養数学:::todo
 統計2級:::todo  -->|50h| 現代数理統計学の基礎:::todo
 現代数理統計学の基礎 -->|150h| Kaggle:::todo
 SQLと事前処理の最適化について:::todo -->|100h| Pytorchなどのフレームワーク:::todo
