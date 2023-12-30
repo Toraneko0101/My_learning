@@ -3,7 +3,7 @@
 合計
     5h / 1850h
 React関係
-    0h / 175h
+    8h / 175h
 
 ※ 合計時間は増える可能性あり
 ※ Progressに変わったら各項目について 5h / 180hという風にしていく
@@ -66,7 +66,7 @@ C#でデスクトップアプリを作る:::todo --> |50h| Unity3D:::todo
 graph TD
   classDef todo fill:#dafbe1
   classDef inProgress fill:orange,fill-opacity:0.3
-フックについて理解を深める:::inProgress --> |25h| Typescript入門:::todo
+フックについて理解を深める:::inProgress --> |8/25h| Typescript入門:::todo
 Redux入門:::todo --> |10h| Firebase入門:::todo --> |10h| Typescript入門:::todo --> |20h| UdemyでDiscordクローンの講座やる:::todo --> |25h| Amplify+Next.js+Typescriptでアプリ1つ作成:::todo
 現在使っているAWSサービスの理解:::todo --> |50h| Amplify+Next.js+Typescriptでアプリ1つ作成:::todo
 boto3の勉強:::todo　--> |35h| Amplify+Next.js+Typescriptでアプリ1つ作成:::todo
